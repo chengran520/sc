@@ -1,0 +1,13 @@
+#stadiv{
+	float: left;
+	width:10%;
+	height: 100%;
+	overflow-x:hidden;
+	overflow-y:auto;
+}
+.selected{
+	background-color: rgb(255, 127, 80);
+}
+.color{
+	background-color: #0ab1f8;
+}

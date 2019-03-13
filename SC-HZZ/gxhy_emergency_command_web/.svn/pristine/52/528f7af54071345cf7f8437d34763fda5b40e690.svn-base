@@ -1,0 +1,110 @@
+.hy_div{
+	width:90%;
+	height:38px;
+	line-height:38px;
+	text-align: center;
+	margin-top:10px;
+	
+	border-radius:5px;
+}
+.hy_div a{
+	text-decoration: none;
+	cursor: pointer;
+	color: #fff;
+	font-size: 15px;
+}
+.enterSpan a{
+	text-decoration: none;
+	cursor: pointer;
+}
+.divMeeting1{
+	height:60px;
+	color: #fff;
+	font-size:14px;
+}
+.spanMeeting1{
+	float: right;
+	margin-right: 10px;
+	margin-top:20px;
+}
+.divMeeting2{
+	height:20px;
+	line-height:20px;
+	white-space: nowrap;
+}
+.imgMeeting{
+	margin-left:10px;
+	margin-top:-5px;
+}
+.divMeeting3{
+	height:200px;
+	border:1px solid #ccc;
+}
+.divMeeting4{
+	width:40%;
+	float: left;
+}
+.divMeeting5{
+	text-align: center;
+	color:#00CD99;
+	font-size: 30px;
+	height:130px;
+	line-height: 130px;
+}
+.divMeeting6{
+	width:60%;
+	float: left;
+	white-space:nowrap;
+}
+.divMeeting7{
+	height:30px;
+	line-height: 30px;
+	color: #5666CF;
+}
+.divMeeting8{
+	height:50px;
+	line-height: 50px;
+}
+.enterSpan_video,.enterSpan_video2{
+	float: right;
+	font-size:15px;
+	font-weight: bold;
+	margin-right:20px;
+	letter-spacing: 2px;
+}
+.enterSpan_video a{
+	color:#3C9F6C;
+}
+.enterSpan_video2 a{
+	color:#999;
+	text-decoration:none;
+}
+.meetingContent{
+	display: none;
+	 position: absolute;
+    z-index: 999;
+}
+.btn dropdown-toggle bs-placeholder btn-default{
+	border: 1px solid #ccc;
+	border-radius:4px;
+}
+.selected{
+	background-color:#FF7F50;
+}
+.pull-left{
+    text-indent: 1em;
+}
+/* .form-group{
+	text-indent: 10px;
+} */
+::-webkit-scrollbar {
+	width:6px;
+	height:10px;
+}
+::-webkit-scrollbar-track     {
+	background:#B3B3B3;
+}
+::-webkit-scrollbar-thumb{
+	background:#3799ff;
+	border-radius:4px;
+}

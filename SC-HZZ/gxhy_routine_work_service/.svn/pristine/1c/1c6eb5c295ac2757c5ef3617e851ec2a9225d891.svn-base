@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.routine.persistence.MsgInfoMapper">
+    <!--发送者  -->
+	<resultMap id="msgMap" type="com.gxhy.routine.domain.MsgInfoModel">
+		<result column="UUID" jdbcType="VARCHAR" property="uuid" />
+		<result column="MSG_CONTENT" jdbcType="VARCHAR" property="msgContent" />
+		<result column="SEND_TM" jdbcType="DATE" property="sendTm" />
+		<result column="SEND_USER" jdbcType="VARCHAR" property="sendUser" />
+		<result column="SEND_USER_ID" jdbcType="VARCHAR" property="sendUserId" />
+		<result column="MSG_TITLE" jdbcType="VARCHAR" property="msgTitle" />
+		<result column="MSG_TYPE" jdbcType="VARCHAR" property="msgType" />
+		<result column="NEWS_TYPE" jdbcType="VARCHAR" property="newsType" />
+		<result column="RECEVICE_USERS" jdbcType="VARCHAR" property="receiveUsers" />
+		<result column="MSG_ID" jdbcType="VARCHAR" property="msgId" />
+		<result column="RECEIVE_USER" jdbcType="VARCHAR" property="receiveUser" />
+		<result column="RECEIVE_USER_ID" jdbcType="VARCHAR" property="receiveUserId" />
+		<result column="IS_STATUS" jdbcType="INTEGER" property="isStatus" />
+		<result column="RECEIVE_TM" jdbcType="DATE" property="receivceTm" />
+	</resultMap>
+	
+   <!-- 查询已发送的信息 -->
+   <select id="getMsgAllInfo" resultType="com.gxhy.routine.domain.MsgInfoModel">
+	   	SELECT M.UUID,M.MSG_CONTENT,M.MSG_TITLE,M.NEWS_TYPE,M.RECEVICE_USERS AS receiveUsers,M.SEND_TM,D.DICT_NM as newsTypeNm FROM IOT_MSG_IFNO  M
+        LEFT JOIN SYS_DICT D  ON M.NEWS_TYPE=D.DICT_VAL
+   		<if test="userId != null and userId != ''">
+   			AND  M.SEND_USER_ID = #{userId}
+   		</if>
+   		    AND  D.DICT_TP= #{dictTp}
+   		    ORDER BY  M.SEND_TM DESC
+   </select>
+   
+   <!-- 保存 -->
+   <insert id="insertMsg">
+   		INSERT INTO IOT_MSG_IFNO (UUID,MSG_CONTENT,SEND_TM,SEND_USER,MSG_TYPE,NEWS_TYPE,MSG_TITLE,SEND_USER_ID,RECEVICE_USERS)
+		VALUES(#{id},#{msgContent},#{sendTm},#{sendUser},#{msgType},#{newsType},#{msgTitle},#{sendUserId},#{reUsers})
+   </insert>
+   
+     <insert id="insertReceive" parameterType="java.util.List">
+		insert into IOT_MSG_RECESTATS (MSG_ID,RECEIVE_USER,RECEIVE_USER_ID,IS_STATUS,RECEIVE_TM) values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.msgId},#{item.receiveUser},#{item.receiveUserId},#{item.isStatus},#{item.receivceTm})
+		</foreach>
+	</insert>
+
+    
+   <!-- 查询通知公告 -->
+   <select id="getInformData" resultMap="msgMap">
+     	SELECT UUID, MSG_TITLE,SEND_TM  FROM IOT_MSG_IFNO WHERE NEWS_TYPE='01' AND SEND_TM BETWEEN  #{startDate}  AND 
+        #{endDate} ORDER BY SEND_TM DESC
+   </select>
+   
+   <!-- 查询通知公告详情 -->
+   <select id="getInformDataDetail" resultType="com.gxhy.routine.domain.MsgInfoModel">
+       SELECT * FROM IOT_MSG_IFNO  WHERE UUID=#{uuid}
+   </select>
+</mapper>

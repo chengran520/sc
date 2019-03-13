@@ -1,0 +1,54 @@
+#qualitytable tbody  tr td,#qualitytable thead  tr th{
+	width:12%;
+	text-align:center;
+	vertical-align:middle;
+}
+#qualitytable tbody  tr{
+	height:25px;
+	line-height: 25px;
+}
+#qualitytable thead  tr{
+	height:30px;
+	line-height: 30px;
+	background:#bfe9fc;
+    color: #000;
+    text-transform: uppercase;
+}
+caption{
+	background: #369cdc;
+    color: #ffffff;
+    text-transform: uppercase;
+    border:none;
+    font-size:18px;
+}
+#qualitytable{
+	margin:0px 10px;
+	border-collapse:collapse;
+	border-spacing:0;
+	border-left:1px solid #888;
+	border-top:1px solid #888;
+}
+#qualitytable th,#qualitytable td{
+	border-right:1px solid #888;
+	border-bottom:1px solid #888;
+}
+#qualitytable th{
+	font-weight:bold;
+}
+#qualitytable thead,#qualitytable tbody tr{
+    display:table;width:100%;table-layout:fixed;
+}
+#qualityList::-webkit-scrollbar {
+    width: 6px;
+    background-color: #eee;
+}
+
+#qualityList::-webkit-scrollbar-track {
+    background-color: #eee;
+}
+
+#qualityList::-webkit-scrollbar-thumb {
+    background:#369cdc;
+}
+
+

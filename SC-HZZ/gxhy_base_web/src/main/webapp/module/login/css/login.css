@@ -1,0 +1,312 @@
+body {
+	height: 100%;
+}
+
+li {
+	list-style: none;
+	margin: 20px auto;
+}
+
+.tab-gxhy {
+	bottom: 0;
+	position: fixed;
+	height: 30px;
+	width: 100%;
+	color: white;
+/* 	background: rgba(41, 201, 255, 0.8); */
+	z-index: 1000;
+}
+
+.tab-gxhy-v {
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	position: absolute;
+	bottom: -4px;
+	color: white;
+}
+
+.tab-gxhy-g {
+	font-size: 12px;
+	font-family: "Microsoft Yahei";
+}
+
+.btn-login {
+	width: 260px;
+	height: 36px;
+	font-size: 20px;
+	padding: 0;
+	background-color: #3f89ec;
+	border-color: #3f89ec;
+}
+
+.li_tab {
+	font-size: 20px;
+	letter-spacing: 4px;
+	color: #fff;
+}
+
+.div-ul {
+	position: absolute;
+    top: 26%;
+	right: 7.9%;
+	z-index: 100;
+}
+
+.div-wehcet {
+	float: left;
+}
+
+.lab-gxhy {
+	font-size: 12px;
+	height: 18px;
+	margin: 0 0 0 21%;
+	color: #fff;
+	font-weight: 300;
+	letter-spacing: 1.3px;
+}
+
+.icp {
+	height: 21px;
+	margin: 0 0 0 36%;
+}
+
+.lab-pc-z {
+	color: #075cb6;
+	font-size: 35px;
+	letter-spacing: 8px;
+	font-weight: 500;
+}
+
+.lab-pc-e {
+	color: #A9A9A9;
+	font-size: 18px;
+	letter-spacing: 1px;
+	font-weight: 500;
+}
+
+.div_hr {
+	float: left;
+	width: 1px;
+	height: 230px;
+	background-color: #E0E0E0;
+	margin: 53px 0 0 13px;
+}
+
+.login_lab {
+	font-size: 15px;
+	color: #FFF;
+	letter-spacing: 5px;
+}
+
+.login_ipt {
+	width: 183px;
+	display: inline;
+}
+
+.div-img {
+	width: 130px;
+	margin: 90px 0 0 50px;
+}
+
+.div-app-wechat {
+	margin: 20px 0 0 57px;
+	color: #F0FFFF;
+	line-height: 25px;
+	font-weight: 300;
+}
+
+
+.loginDiv {
+	background: url(../images/login_bj_sc.jpg)
+		no-repeat;
+	width: 100%;
+	height: auto;
+	background-size: cover;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: -1;
+}
+
+.logo_bj_div {
+	position: absolute;
+    top: 25%;
+    right: 6%;
+	width: 345px;
+	height: 350px;
+	background: #00BFFF;
+	filter: alpha(opacity = 50);
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+	opacity: 0.8;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	z-index: 10;
+}
+
+.toorBar {
+	position: fixed;
+	left: 80px;
+	top: 5px;
+}
+
+.toor-item {
+	float: left;
+	display: block;
+	width: 50px;
+	height: 50px;
+	border-radius: 3px;
+	margin-right: 3px;
+	margin-top: 1px;
+	position: relative;
+	-moz-transition: background-position 1s;
+	-ms-transition: background-position 1s;
+	-o-moz-transition: background-position 1s;
+	-webkit-moz-transition: background-position 1s;
+	transition: background-position 1s;
+}
+
+.toor-item-o {
+	background: url(../images/logo-app.png) no-repeat;
+}
+
+.toor-item-w {
+	background: url(../images/logo-wechat.png) no-repeat;
+}
+
+.weixin {
+	width: 50px;
+	height: 50px;
+	position: relative;
+	font-size: 12px;
+	text-align: center;
+	margin-right: 3px;
+	left: 5px;
+}
+
+.weixin a {
+	width: 50px;
+	height: 50px;
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	border-radius: 5px;
+	background: url(../images/logo-wechat.png) no-repeat center top;
+}
+
+.weixin .weixin_nr {
+	width: 195px;
+	height: 226px;
+	padding: 10px;
+	background: #fff;
+	text-align: center;
+	position: absolute;
+	left: 61px;
+	top: -60px;
+	display: none;
+	border-radius: 5px;
+}
+
+.weixin .weixin_nr img {
+	margin-bottom: 5px;
+}
+
+.weixin .weixin_nr .arrow {
+	width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-right: 10px solid #fff;
+    border-bottom: 10px solid transparent;
+    position: absolute;
+    left: -8px;
+    top: 68px;
+}
+
+.weixin.on .weixin_nr {
+	display: block;
+}
+
+.weixin.on a {
+	background: url(../images/logo-wechat.png) no-repeat left bottom;
+}
+
+.hzzapp {
+	width: 50px;
+	height: 50px;
+	position: relative;
+	font-size: 12px;
+	text-align: center;
+	left: 5px;
+}
+
+.hzzapp a {
+	width: 50px;
+	height: 50px;
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	border-radius: 5px;
+	background: url(../images/logo-app.png) no-repeat center top;
+}
+
+.hzzapp .hzzapp_nr {
+	width: 195px;
+	height: 226px;
+	padding: 10px;
+	background: #fff;
+	text-align: center;
+	position: absolute;
+	left: 61px;
+	top: -60px;
+	display: none;
+	border-radius: 5px;
+}
+
+.hzzapp .hzzapp_nr img {
+	margin-bottom: 5px;
+}
+
+.hzzapp .hzzapp_nr .arrow {
+	width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-right: 10px solid #fff;
+    border-bottom: 10px solid transparent;
+    position: absolute;
+    left: -8px;
+    top: 68px;
+}
+
+.hzzapp.on .hzzapp_nr {
+	display: block;
+}
+
+.hzzapp.on a {
+	background: url(../images/logo-app.png) no-repeat left bottom;
+}
+
+.logo-ewm {
+	font-size: 14px;
+	font-weight: bold;
+	letter-spacing: 2px;
+	font-family: Microsoft Yahei;
+}
+
+.logo-gz {
+	letter-spacing: 2px;
+	font-weight: bold;
+	font-family: Microsoft Yahei;
+}
+@media only screen and (max-width:414px){
+	.div-ul{
+    	right: 15%;
+    }
+    .logo_bj_div{
+   	    right: 6%;
+    }
+}

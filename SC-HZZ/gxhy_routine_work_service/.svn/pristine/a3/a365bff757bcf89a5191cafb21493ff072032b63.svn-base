@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.routine.persistence.RoutineMapper">
+
+   <!-- 我的巡检记录 -->
+    <select id="getMyRoutineWorks" resultType="com.gxhy.routine.domain.PatrolCatalogModel">
+		<include refid="RoutineSql"></include>
+		 AND P.PATROL_UID=#{userId} ORDER BY PATROL_TM DESC  
+    </select>
+    
+    <!-- 下级巡检日志 -->
+    <select id="getSubRoutineWorks" resultType="com.gxhy.routine.domain.PatrolCatalogModel">
+        <include refid="RoutineSql"></include> 
+		 AND P.PATROL_ADCD LIKE '${adcd}%'  AND (U.JOB  IN
+		<foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+           #{item}
+        </foreach>
+        or  U.DEPTID  IN
+        <foreach collection="depts" index="index1" item="item" open="(" separator="," close=")">
+           #{item}
+        </foreach>
+        )
+		ORDER BY PATROL_TM desc 
+    </select>
+    
+     <!-- 县级查看所有人的巡检日志 -->
+    <select id="getSubRoutineWorksAll" resultType="com.gxhy.routine.domain.PatrolCatalogModel">
+         <include refid="RoutineSql"></include> 
+          ORDER BY PATROL_TM desc 
+    </select>
+    
+    <!--获取所有人的巡河日志  -->
+    <select id="getAllRoutineWorks" resultType="com.gxhy.routine.domain.PatrolCatalogModel">
+         <include refid="RoutineSql"></include> 
+		  ORDER BY PATROL_TM desc 
+    </select>
+    
+    
+    <!-- 获取轨迹 -->
+    <select id="getRoutineUrl" resultType="com.gxhy.routine.domain.PatrolCatalogModel">
+    	SELECT * FROM IOT_PATROL_BASE WHERE  1= 1 AND UUID = #{routineId}
+    </select>
+    
+    <!-- 保洁巡河 -->
+    <select id="getCleanRoutineWorks"  resultType="com.gxhy.routine.domain.PatrolCatalogModel">
+       <include refid="RoutineSql"></include>
+	   AND U.JOB=#{job}  ORDER BY PATROL_TM desc
+    </select>
+    
+      
+    <!-- 巡河记录 --> 
+      <select id="getRoutineWorks" resultType="com.gxhy.routine.domain.PatrolCatalogModel">      
+         SELECT PATROL_TM,PATROL_END_TM,PATROL_START_POINT,PATROL_END_POINT,PATROL_TM_LT,PATROL_MILEAGE  FROM IOT_PATROL_BASE
+         WHERE 1=1
+        <if test="stm != null and stm != ''">
+			AND  PATROL_TM>= #{stm}
+		</if>
+		<if test="etm != null and etm != ''">
+			AND  PATROL_TM &lt;= #{etm}
+		</if>
+		<if test="userId != null and userId != ''">
+			AND  PATROL_UID = #{userId} 
+		</if>
+      </select> 
+      
+      
+       
+    <!-- 基础sql语句 -->
+    <sql id="RoutineSql">
+        SELECT P.UUID,P.PATROL_TM AS PATROLTM,P.PATROL_UID,(SELECT USER_NAME FROM SYS_USER  WHERE
+        USER_ID=P.PATROL_UID)AS patrolUName,P.PATROL_START_ADDRESS AS patrolStartPoint,P.PATROL_END_ADDRESS 
+        AS patrolEndPoint,P.PATROL_MILEAGE,P.PATROL_TM_LT,P.PATROL_ADCD,P.PATROL_PATH,P.PATROL_END_TM AS PATROLENDTM,
+        A.ADDVNM AS PATROADDVNM,U.USER_NAME AS REPORTPUNAME,U.JOB FROM IOT_PATROL_BASE P INNER JOIN  ST_ADDVCD_D A ON
+        P.PATROL_ADCD=A.ADDVCD INNER JOIN SYS_USER U ON P.PATROL_UID = U.USER_ID
+        <where>
+	        <if test="patrolStartTm != null and patrolStartTm != ''">
+				AND P.PATROL_END_TM>= #{patrolStartTm}
+			</if>
+			<if test="patrolEndTm != null and patrolEndTm != ''">
+				AND  P.PATROL_END_TM &lt;= #{patrolEndTm}
+			</if>
+			<if test="patrolUser != null and patrolUser != ''">
+				AND U.USER_NAME  LIKE '%${patrolUser}%'  
+			</if>
+		</where>
+    </sql>
+    
+    <!-- 第一种报表 -->
+    <select id="exportTj"  resultType="com.gxhy.routine.webmodel.PatrolResultModel">
+        SELECT S.USER_NAME AS userNm,(SELECT COUNT(I.UUID) FROM  IOT_PATROL_BASE  I 
+		WHERE I.PATROL_UID=S.USER_ID 
+		 <if test="patrolStartTm != null and patrolStartTm != ''">
+			AND I.PATROL_END_TM>= #{patrolStartTm}
+		 </if>
+		<if test="patrolEndTm != null and patrolEndTm != ''">
+			AND  I.PATROL_END_TM &lt;= #{patrolEndTm}
+		</if>
+		)AS count,R.ROLE_ID AS roleId FROM  SYS_USER S
+		LEFT JOIN SYS_USER_ROLE R
+		ON S.USER_ID=R.USER_ID       
+    </select>
+    
+    <!--  第二种报表-->
+    <select id="exportTj2"  resultType="com.gxhy.routine.webmodel.CountResultModel">
+        SELECT COUNT(U.USER_ID)AS count,R.ROLE_ID AS roleId,MAX(D.ADDVNM)AS addvnm,ADDVCD 	AS addvcd FROM SYS_USER U 
+		LEFT JOIN SYS_USER_ROLE R
+		ON R.USER_ID=U.USER_ID
+		LEFT JOIN ST_ADDVCD_D D
+		ON U.USER_ADDVCD=D.ADDVCD
+		LEFT JOIN IOT_PATROL_BASE P
+		ON U.USER_ID=P.PATROL_UID
+		WHERE R.ROLE_ID IN('country','village','xhy') and ADDVCD!='360735000000'
+		GROUP BY D.ADDVCD,R.ROLE_ID  
+		order by d.ADDVCD asc,CASE ROLE_ID WHEN 'country' THEN '1' WHEN 'village' THEN '2'  WHEN 'xhy' THEN '3'  END asc
+    </select>
+    
+    <select id="exportTj3"   resultType="com.gxhy.routine.webmodel.CountResultModel">       		
+		SELECT COUNT(p.UUID) AS count,R.ROLE_ID AS roleId,MAX(D.ADDVNM)AS addvnm, month(PATROL_TM) as month
+        FROM SYS_USER U 
+		LEFT JOIN SYS_USER_ROLE R
+		ON R.USER_ID=U.USER_ID
+		LEFT JOIN ST_ADDVCD_D D
+		ON U.USER_ADDVCD=D.ADDVCD
+		LEFT JOIN IOT_PATROL_BASE P
+		ON U.USER_ID=P.PATROL_UID
+		WHERE R.ROLE_ID IN('country','village','xhy') and ADDVCD!='360735000000'
+		GROUP BY D.ADDVCD,R.ROLE_ID,year(PATROL_TM),month(PATROL_TM) having month(PATROL_TM) IN
+		  <foreach collection="months" open="(" close=")" item="id" separator=",">
+            #{id}
+          </foreach> 
+        order by d.ADDVCD asc,CASE ROLE_ID WHEN 'country' THEN '1' WHEN 'village' THEN '2'  WHEN 'xhy' THEN '3'  END asc
+    </select>
+</mapper>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Encapsulate field &apos;com.gxhy.routine.webmodel.PatrolResultModel.addvnm&apos; in &apos;com.gxhy.routine.webmodel.PatrolResultModel&apos;&#x0D;&#x0A;- Original project: &apos;gxhy_routine_work_service&apos;&#x0D;&#x0A;- Original element: &apos;com.gxhy.routine.webmodel.PatrolResultModel.addvnm&apos;&#x0D;&#x0A;- Getter method name: &apos;getAddvnm&apos;&#x0D;&#x0A;- Setter method name: &apos;setAddvnm&apos;&#x0D;&#x0A;- Field visibility: &apos;public&apos;&#x0D;&#x0A;- Use getter and setter methods in declaring type" comments="false" declaring="true" description="Encapsulate field &apos;addvnm&apos;" flags="589830" getter="getAddvnm" id="org.eclipse.jdt.ui.self.encapsulate" input="/src\/main\/java&lt;com.gxhy.routine.webmodel{PatrolResultModel.java[PatrolResultModel^addvnm" insertion="5" setter="setAddvnm" stamp="1551768776520" version="1.0" visibility="1"/>
+</session>

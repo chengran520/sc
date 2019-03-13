@@ -1,0 +1,14 @@
+#modal-body{
+	overflow: auto;
+}
+#modal-body::-webkit-scrollbar {
+	width:5px;
+	height:10px;
+}
+#modal-body::-webkit-scrollbar-track     {
+	background:#B3B3B3;
+}
+#modal-body::-webkit-scrollbar-thumb{
+	background:#1C86EE;
+	border-radius:4px;
+}

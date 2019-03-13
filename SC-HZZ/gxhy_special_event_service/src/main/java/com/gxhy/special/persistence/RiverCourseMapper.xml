@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.special.persistence.RiverCourseMapper">
+	<!--查询河道专题 -->
+	<select id="getRiverCourses" resultType="com.gxhy.special.domain.RiverCourseModel">		
+	   SELECT B.BUSINE_ID,B.BUSINE_DESC,B.BUSINE_ORIGIN,(SELECT  DICT_NM FROM SYS_DICT WHERE DICT_TP='BZTP' AND B.BUSINE_TYPE=DICT_VAL)AS busineTypeNm,
+	   (SELECT USER_NAME FROM SYS_USER WHERE B.BUSINE_UID=USER_ID) AS busineUm,(SELECT USER_NAME FROM SYS_USER WHERE USER_ID=(SELECT TOP 
+	   1 HANDLE_USERID FROM IOT_WORKFLOW WHERE BUSINE_ID=B.BUSINE_ID ORDER BY HANDLE_TM DESC))AS handleUserNm,B.CREATE_TM,(SELECT TOP 1 
+	   HANDLE_TM FROM IOT_WORKFLOW WHERE BUSINE_ID=B.BUSINE_ID ORDER BY HANDLE_TM DESC) AS updateTm,B.BUSINE_ADDRESS,
+	   (select DICT_NM from SYS_DICT where  DICT_TP='JOB'  AND  DICT_VAL=(SELECT U.job FROM SYS_USER
+	    U WHERE U.USER_ID=b.BUSINE_UID))as  job,(select DEPT_NM from SYS_DEPT  where  DEPT_ID=(SELECT U.DEPTID
+	    FROM SYS_USER U WHERE U.USER_ID=b.BUSINE_UID)) AS dept FROM IOT_BUSINE_ACCEPT B WHERE 1=1
+		<include refid="requirementSQL" />
+		ORDER BY UPDATE_TM DESC
+	</select>
+	
+   <select id="getRiverCourses2" resultType="com.gxhy.special.domain.RiverCourseModel">		
+	   SELECT B.BUSINE_ID,B.BUSINE_DESC,(SELECT  DICT_NM FROM SYS_DICT WHERE DICT_TP='BZTP' AND B.BUSINE_TYPE=DICT_VAL)AS busineTypeNm,
+	   (SELECT USER_NAME FROM SYS_USER WHERE B.BUSINE_UID=USER_ID) AS busineUm,(SELECT USER_NAME FROM SYS_USER WHERE USER_ID=(SELECT TOP 
+	   1 HANDLE_USERID FROM IOT_WORKFLOW WHERE BUSINE_ID=B.BUSINE_ID ORDER BY HANDLE_TM DESC))AS handleUserNm,B.CREATE_TM,(SELECT TOP 1 
+	   HANDLE_TM FROM IOT_WORKFLOW WHERE BUSINE_ID=B.BUSINE_ID ORDER BY HANDLE_TM DESC) AS updateTm,B.BUSINE_ADDRESS FROM IOT_BUSINE_ACCEPT
+	   B WHERE BUSINE_STATUS=3  AND  BUSINE_TYPE IN('01','04') 
+	   ORDER BY UPDATE_TM DESC
+	</select>
+	
+	<!--查询河道专题，事件专题，污染专题所占的比例  -->
+	<select id="getPieRiverCourse" resultType="java.lang.Integer">
+	    select count(BUSINE_ID),BUSINE_TYPE from IOT_BUSINE_ACCEPT where 1=1
+		<include refid="requirementSQL" />
+	    group BY BUSINE_TYPE
+	</select> 
+	
+	<sql id="requirementSQL">
+		<if test="type == 1">
+	    	AND BUSINE_TYPE in ('01','04','08','14','15')
+	    </if>
+   	    <if test="type == 2">
+	    	AND BUSINE_TYPE in ('02','07','13')
+	    </if>
+	    <if test="type == 3">
+	    	AND BUSINE_TYPE in ('05','06','09','10','11') 
+	    </if>
+	    <if test="type == 4">
+	    	AND BUSINE_TYPE in ('03','12') 
+	    </if>
+	</sql>
+</mapper>

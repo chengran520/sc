@@ -1,0 +1,33 @@
+#rainLiist tr td{
+	width:24%;
+	text-align:center;
+	vertical-align:middle;
+	border-right:1px solid #888;
+	border-bottom:1px solid #888;
+}
+#rainLiist tr{
+	height:25px;
+	line-height: 25px;
+	width:100%;
+	border-right:1px solid #888;
+}
+caption{
+	background: #369cdc;
+    color: #ffffff;
+    text-transform: uppercase;
+    border:none;
+    font-size:18px;
+}
+#rainLiist::-webkit-scrollbar {
+    width: 6px;
+    background-color: #eee;
+  
+}
+#rainLiist::-webkit-scrollbar-track {
+    background-color: #eee;
+      border-left:1px solid #888; 
+}
+
+#rainLiist::-webkit-scrollbar-thumb {
+    background:#369cdc;
+}

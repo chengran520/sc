@@ -1,0 +1,25 @@
+
+img {  
+ vertical-align: middle;
+     display: inline-block;
+}  
+body {  
+ overflow-y: scroll !important;  
+}  
+.view {  
+ word-break: break-all;  
+}  
+
+.view  p {
+	    width: 99%;
+    height: 99%;
+}
+.vote_area {  
+ display: block;  
+}  
+.vote_iframe {  
+ background-color: transparent;  
+ border: 0 none;  
+ height: 100%;  
+}  
+#edui1_imagescale{display:none !important;} 

@@ -1,0 +1,45 @@
+/*********工作台************/
+.menu_gzt{
+	background: url(../images/menu/menu_gzt.png) no-repeat;
+}
+/*********一张图************/
+.menu_yzt{
+	background: url(../images/menu/menu_yzt.png)  no-repeat;
+}
+.menu_yzt_select{
+	background: url(../images/menu/menu_yzt_select.png)  no-repeat;
+}
+/*********业务受理************/
+.menu_ywsl{
+	background: url(../images/menu/menu_ywsl.png) no-repeat;
+}
+/*********日常办公************/
+.menu_rcgz {
+	background: url(../images/menu/menu_rcgz.png) no-repeat;
+}
+/*********数据中心************/
+.menu_sjzx {
+	background: url(../images/menu/menu_sjzx.png) no-repeat;
+}
+/*********专题事件************/
+.menu_ztsj {
+	background: url(../images/menu/menu_ztsj.png) no-repeat;
+}
+/*********文案管理************/
+.menu_wagl {
+	background: url(../images/menu/menu_wagl.png) no-repeat;
+}
+/*********平台管理************/
+.menu_ptgl {
+	background: url(../images/menu/menu_ptgl.png) no-repeat;
+}
+/*********应急指挥************/
+.menu_yjzh {
+	background: url(../images/menu/menu_yjzh.png) no-repeat;
+}
+.menu_yhyc {
+	background: url(../images/menu/menu_yhyc.png) no-repeat;
+}
+
+
+

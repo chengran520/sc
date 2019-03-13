@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.busine.persistence.DictMapper">
+    <resultMap  id="dictMap"  type="com.gxhy.busine.domain.DictModel" >
+	    <result column="DICT_NM" jdbcType="VARCHAR" property="dictNm" />
+        <result column="DICT_VAL" jdbcType="VARCHAR" property="dictVal" />
+		<result column="DICT_TP" jdbcType="VARCHAR" property="dictTp" />
+		<result column="CREATE_TIME" jdbcType="DATE" property="createTm" />
+		<result column="UPDATE_TIME" jdbcType="DATE" property="updateTm" />
+		<result column="CONTENT" jdbcType="VARCHAR" property="content" />
+    </resultMap>
+   <!-- 查询字典名称 -->
+   <select id="getBusineTypes" resultMap="dictMap">
+       SELECT DICT_NM,DICT_VAL FROM SYS_DICT WHERE DICT_TP=#{dictTp}
+   </select>
+</mapper>

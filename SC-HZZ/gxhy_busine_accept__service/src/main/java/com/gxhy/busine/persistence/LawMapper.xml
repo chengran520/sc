@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.busine.persistence.LawMapper">
+   <!-- 查询执法监管数据 -->
+   <select id="getLawDataList" resultType="com.gxhy.busine.webmodel.LawGztResultModel">
+     SELECT I.UUID AS uuid,B.BUSINE_DESC AS busineDesc,B.UPDATE_TM  AS updateTm FROM IOT_LAW_MENT  I
+     LEFT JOIN 
+	 IOT_BUSINE_ACCEPT   B
+	 on I.LAW_SOURCE=B.BUSINE_ID WHERE REPORT_USER=#{userId}  and  IS_FILING=0  
+   </select>
+</mapper>

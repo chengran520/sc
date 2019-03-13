@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.adcd.persistence.AdcdMapper">
+  <resultMap id="BaseResultMap" type="com.gxhy.adcd.domain.AdcdModel">
+    <result column="ADDVCD" jdbcType="VARCHAR" property="addvcd" />
+    <result column="ADDVNM" jdbcType="VARCHAR" property="addvnm"/>
+  </resultMap>
+  
+    <!-- 根据user表中的userid查询用户和单位信息 --> 
+   <select id="getAdcdNm" resultMap="BaseResultMap">  
+      SELECT ADDVCD,ADDVNM FROM ST_ADDVCD_D WHERE 1 = 1 
+      <if test="adcd != null and adcd != ''">
+      		AND ADDVCD LIKE '%${adcd}%'
+      </if>
+      ORDER BY ADDVCD 
+   </select>
+ 
+   <!-- 获取当前用户下行政区及河道信息 -->
+   <select id="getAdcdRiverTree" resultMap="BaseResultMap">
+   		select ADDVCD,ADDVNM from ST_ADDVCD_D where ADDVCD in (select distinct (SUBSTRING(ADDVCD,1,#{len})+ #{suffix}) 
+		from ST_ADDVCD_D where ADDVCD like '${adcd_pre}%' and ADDVCD != #{adcd})
+   </select>
+ 
+	<!-- 根据行政区编码查询行政区名称 -->
+	<select id="getAddvnm" resultType="String">
+	    SELECT ADDVNM FROM ST_ADDVCD_D WHERE ADDVCD=#{ADDVCD}
+	</select>
+	
+	<!-- 获取当前用户行政区下所有下级 -->
+	<select id="getUserAdcdZtree" resultMap="BaseResultMap">
+		 SELECT ADDVCD,ADDVNM FROM ST_ADDVCD_D WHERE ADDVCD LIKE '${adcd}%' order by ADDVCD
+	</select>
+</mapper>
+

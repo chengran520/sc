@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.base.persistence.SysMenuMapper">
+  <resultMap id="BaseResultMap" type="com.gxhy.base.domain.SysMenu">
+    <result column="MENU_ID" jdbcType="VARCHAR" property="menuId" />
+    <result column="P_MENU_ID" jdbcType="VARCHAR" property="pMenuId" />
+    <result column="MENU_URL" jdbcType="VARCHAR" property="menuUrl" />
+  </resultMap>
+  
+    <!-- 通过用户ID查询 -->
+	<select id="getMenuPageById"   resultMap="BaseResultMap">
+		SELECT MENU_ID,MENU_URL,P_MENU_ID FROM SYS_MENU  WHERE MENU_ID IN (
+		SELECT M.MENU_ID FROM SYS_ROLE_MENU RM,SYS_MENU M WHERE RM.MENU_ID = M.MENU_ID AND RM.ROLE_ID = 
+		(SELECT ROLE_ID FROM SYS_USER_ROLE WHERE USER_ID = (SELECT USER_ID FROM SYS_USER WHERE USER_ID =  #{userId}))) ORDER BY CAST(SORT AS INT)
+	</select>
+   
+</mapper>
+

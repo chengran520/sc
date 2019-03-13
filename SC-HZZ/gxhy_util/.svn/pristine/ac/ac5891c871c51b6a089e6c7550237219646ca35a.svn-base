@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.base.persistence.SysRoleMapper">
+  <resultMap id="BaseResultMap" type="com.gxhy.base.domain.SysRole">
+    <result column="ROLE_ID" jdbcType="VARCHAR" property="roleId" />
+    <result column="ROLE_NAME" jdbcType="VARCHAR" property="roleName" />
+  </resultMap>
+  
+    <!-- 根据userid查询用户的角色 --> 
+   <select id="querySysRoleByUserId" resultMap="BaseResultMap">  
+      	SELECT distinct ROLE_ID,ROLE_NAME FROM SYS_ROLE WHERE 1 = 1 AND ROLE_ID IN (SELECT ROLE_ID FROM SYS_USER_ROLE WHERE USER_ID = #{userId})
+   </select>
+ 
+</mapper>
+

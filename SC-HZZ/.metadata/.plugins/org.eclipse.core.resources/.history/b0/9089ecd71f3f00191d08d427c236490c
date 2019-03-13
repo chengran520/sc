@@ -1,0 +1,11 @@
+package com.gxhy.datamonitor.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@SuppressWarnings({ "unchecked","rawtypes","unused"})
+@RestController
+@RequestMapping("data/sewage")
+public class SewageController {
+
+}

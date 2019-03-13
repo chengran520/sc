@@ -1,0 +1,21 @@
+var sewage={
+		getSewageData:function(){
+			easyui_datagrid_util.fit=false;
+			easyui_datagrid_util.singleSelect=true;
+			easyui_datagrid_util.pageSize=20;
+			easyui_datagrid_util.create_datagrid_options("patrol_sewage", WEB_ROOT+ "/data/sewage/getSewages",sewage,null);
+		},	
+		queryRvData:function(){
+			var keyword=$("#keyword").val();
+			var data = {'keyword':keyword};
+			$('#patrol_Reservoir').datagrid('load',data); 
+		},
+		
+		
+}
+$(function(){
+	var p = $(window).height();	
+	var contextH =$("#headerRvdiv").height();
+	$("#patrol_sewage").height(p-contextH);
+	sewage.getSewageData();
+});

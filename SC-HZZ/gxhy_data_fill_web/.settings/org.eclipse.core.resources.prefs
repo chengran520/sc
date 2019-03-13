@@ -1,0 +1,10 @@
+eclipse.preferences.version=1
+encoding//src/main/java=UTF-8
+encoding//src/main/resources=UTF-8
+encoding//src/main/webapp/WEB-INF/sysconfig-cloud.properties=UTF-8
+encoding//src/main/webapp/WEB-INF/sysconfig-development.properties=UTF-8
+encoding//src/main/webapp/WEB-INF/sysconfig-production.properties=UTF-8
+encoding//src/main/webapp/WEB-INF/sysconfig-test.properties=UTF-8
+encoding//src/main/webapp/data_fill/fillDeatil.jsp=UTF-8
+encoding//src/test/java=UTF-8
+encoding/<project>=UTF-8

@@ -1,0 +1,288 @@
+package com.gxhy.routine.controller;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.gxhy.base.controller.BaseController;
+import com.gxhy.base.domain.SysUsers;
+import com.gxhy.base.exp.JxlsUtils;
+import com.gxhy.base.model.Log;
+import com.gxhy.base.model.RequestModel;
+import com.gxhy.base.model.ResponseModel;
+import com.gxhy.base.security.util.SecurityUtil;
+import com.gxhy.base.util.AdcdUtil;
+import com.gxhy.base.util.DateUtil;
+import com.gxhy.routine.domain.PatrolCatalogModel;
+import com.gxhy.routine.domain.ResultMapModel;
+import com.gxhy.routine.persistence.RoutineMapper;
+import com.gxhy.routine.service.RoutineService;
+import com.gxhy.routine.webmodel.QueryModel;
+
+/**
+ * 日常巡查
+ * @author yb
+ * @2017年7月28日下午6:42:38   
+ * @CopyRight gxhy
+ */
+@RestController
+@RequestMapping("routine/work")
+@SuppressWarnings({"rawtypes","unchecked"})
+public class RoutineController extends BaseController{
+	
+	@Autowired
+	RoutineService routineSerivce;
+
+	/**
+	 * 获取当前用户巡查信息
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/getMyRoutineWorks", method = RequestMethod.GET)
+	@Log(operationType = "巡河日志",operationName="我的日志")
+	public Object getPatrolCatalog(HttpServletRequest request,ResultMapModel model) throws Exception{
+		JSONObject map = new JSONObject();
+		SysUsers user = SecurityUtil.getSessionUser();
+		map = InitParams(model);
+		RequestInitRanges(map,true,ResultMapModel.class);
+		if(user != null){
+		   map.put("userId",user.getUserId());
+		   String patrolStartTm=request.getParameter("patrolEndTm");
+		   if(StringUtils.isNotBlank(patrolStartTm)){
+			   map.put("patrolStartTm", DateUtil.convertStringToDate(request.getParameter("patrolStartTm")));
+		   }
+		   String endTm=request.getParameter("patrolEndTm");
+		   if(StringUtils.isNotBlank(endTm)){
+			   map.put("patrolEndTm",DateUtil.getEndToTime(endTm));
+		   }
+		   map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getMyRoutineWorks");
+		   Page list = routineSerivce.selectList(map);
+		   return ResponseModel.Success(list);
+		}else{
+		   return ResponseModel.Success(null);  
+		}
+	}
+	
+	@RequestMapping(value = "/getPatrolUrl", method = RequestMethod.GET)
+	public Object getPatrolUrl(HttpServletRequest reques){
+		 String routineId  = reques.getParameter("routineId");
+		 JSONObject map = new JSONObject();
+		 map.put("routineId",routineId);
+		 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getRoutineUrl");
+		 PatrolCatalogModel model = (PatrolCatalogModel) routineSerivce.selectOne(map);
+		 if(model != null){
+			 File trajectFile = new File(model.getPatrolPath());
+			 if(!trajectFile.exists()){
+				 return ResponseModel.Failure("未找到对应轨迹！");
+			 }
+			 String encoding = "UTF-8";  
+			 Long filelength = trajectFile.length();  
+			 byte[] filecontent = new byte[filelength.intValue()];  
+			 try {  
+				 FileInputStream in = new FileInputStream(trajectFile);  
+				 in.read(filecontent);  
+				 in.close();  
+			 } catch (FileNotFoundException e) {  
+				 e.printStackTrace();  
+			 } catch (IOException e) {  
+				 e.printStackTrace();  
+			 }  
+			 try {  
+				 String path = new String(filecontent, encoding);  
+				 return ResponseModel.Success(path);
+			 } catch (UnsupportedEncodingException e) {  
+				 System.err.println("The OS does not support " + encoding);  
+				 e.printStackTrace();  
+				 return null;  
+			 }  
+		 }
+		 return ResponseModel.Failure("未找到对应轨迹！");
+	}
+	
+	/**
+	 * 获取当前用户的下级巡河信息
+	 * @return
+	 * @throws Exception 
+	 */	
+	@RequestMapping(value = "/getSubRoutineWorks", method = RequestMethod.GET)
+	@Log(operationType = "日常巡查",operationName="下级巡检日志")
+	public Object getSubRoutineWorks(HttpServletRequest request,ResultMapModel model) throws Exception{
+		JSONObject map = new JSONObject();
+		map = InitParams(model);
+		RequestInitRanges(map,true,ResultMapModel.class);
+		SysUsers user = SecurityUtil.getSessionUser();
+		String addvcd = user.getUserAddvcd();
+		String prefixAdcd = AdcdUtil.getPrefixAdcd(addvcd, false);
+		map.put("adcd", prefixAdcd);
+		map.put("patrolStartTm", DateUtil.convertStringToDate(request.getParameter("patrolStartTm")));
+	  	map.put("patrolEndTm",DateUtil.getEndToTime(request.getParameter("patrolEndTm")));
+	  	map.put("patrolUser", request.getParameter("patrolUser"));
+	  	int job=Integer.parseInt(user.getUserJob());
+	  	int deptId=Integer.parseInt(user.getDeptId());
+		 if(job<=7||job==14||user.getUserId().equals("cmc")){//县级可以查询所有的巡河记录
+			 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getSubRoutineWorksAll");
+		 }else if(job==8||job==13||(deptId>=33&&deptId<=43)){//乡级查看所在行政区的所有人的巡河记录（村河长，乡河长，乡镇管理所，巡查员，保洁员）
+				int[] arr={8,9,10,11,13};
+				int[] depts={33,34,35,36,37,38,39,40,41,43};
+				map.put("arr", arr);
+				map.put("depts", depts);
+			map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getSubRoutineWorks");
+		 }else{//村河长或者巡河员或者保洁员查询自己的巡河记录
+			 map.put("userId",user.getUserId());
+			 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getMyRoutineWorks");
+		 }  
+	  	List<PatrolCatalogModel> list  = routineSerivce.selectList(map);
+	  	return ResponseModel.Success(list);
+	}
+	
+	/**
+	 * 保洁巡河信息
+	 * @return
+	 * @throws Exception 
+	 */	
+	@RequestMapping(value = "/getCleanRoutineWorks", method = RequestMethod.GET)
+	@Log(operationType = "日常巡查",operationName="保洁巡河")
+	public Object getCleanRoutineWorks(HttpServletRequest request,ResultMapModel model) throws Exception{
+		   JSONObject map = new JSONObject();
+		   map = InitParams(model);
+		   RequestInitRanges(map,true,ResultMapModel.class);
+		   String patrolStartTm=request.getParameter("patrolEndTm");
+		   if(StringUtils.isNotBlank(patrolStartTm)){
+			   map.put("patrolStartTm", DateUtil.convertStringToDate(request.getParameter("patrolStartTm")));
+		   }
+		   String endTm=request.getParameter("patrolEndTm");
+		   if(StringUtils.isNotBlank(endTm)){
+			   map.put("patrolEndTm",DateUtil.getEndToTime(endTm));
+		   }
+		   map.put("job", 10);
+		   map.put("patrolUser", request.getParameter("patrolUser"));
+		   map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getCleanRoutineWorks");
+		   List<PatrolCatalogModel> list  = routineSerivce.selectList(map);
+		   return ResponseModel.Success(list);
+	}
+	
+	
+	/***
+	 *查询巡河记录
+	 */
+	
+	/**
+	 * 导出巡河记录
+	 * excel表
+	 * @param model
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	 @RequestMapping(value = "/exportRoutineWork", method = RequestMethod.POST)
+	 	public void  exportRoutineWork(QueryModel model,HttpServletRequest request,HttpServletResponse response) throws Exception {
+	    	Map<String, List<PatrolCatalogModel>> maps = new HashMap<String, List<PatrolCatalogModel>>();
+	 		JSONObject map = new JSONObject();
+	 		SysUsers user = SecurityUtil.getSessionUser();
+	 		map = InitParams(model);
+	 		String stm=request.getParameter("stm");
+	 		if(StringUtils.isNotBlank(stm)){
+	 			map.put("stm", DateUtil.convertStringToDate(stm));
+	 		}
+	 		String etm=request.getParameter("etm");
+	 		if(StringUtils.isNotBlank(stm)){
+	 			map.put("etm", DateUtil.convertStringToDate(etm));
+	 		}
+		    map.put("userId", user.getUserId()); 
+		    map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getRoutineWorks");
+		    export(request, response, maps, map, user.getUserName(),"routineInfo");
+	 		
+	  }
+     
+     /**
+      * 下级巡河
+      * @param model
+      * @param request
+      * @param response
+      * @throws Exception
+      */
+     @RequestMapping(value = "/exportSubRoutine", method = RequestMethod.POST)
+     public void  exportSubRoutine(QueryModel model,HttpServletRequest request,HttpServletResponse response) throws Exception {
+    	 Map<String, List<PatrolCatalogModel>> maps = new HashMap<String, List<PatrolCatalogModel>>();
+    	 JSONObject map = new JSONObject();
+    	 SysUsers user = SecurityUtil.getSessionUser();
+    	 map = InitParams(model);
+    	 String stm=request.getParameter("stm");
+    	 map.put("adcd", AdcdUtil.getPrefixAdcd(user.getUserAddvcd(), true));
+    		map.put("patrolUser", request.getParameter("patrolUser"));
+    	 if(StringUtils.isNotBlank(stm)){
+    		 map.put("patrolStartTm", DateUtil.convertStringToDate(stm));
+    	 }
+    	 String etm=request.getParameter("etm");
+    	 if(StringUtils.isNotBlank(stm)){
+    		 map.put("patrolEndTm",DateUtil.getEndToTime(etm));
+    	 }
+    	 int job=Integer.parseInt(user.getUserJob());
+ 		 if(job<=7||job==14||user.getUserId().equals("cmc")){//县级可以查询所有的巡河记录
+ 			 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getSubRoutineWorksAll");
+ 		 }else if(job==8||job==13){//乡级查看所在行政区的所有人的巡河记录
+ 			int[] arr={8,9,10,11,13};
+ 			map.put("arr", arr);
+ 			map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getSubRoutineWorks");
+ 		 }else{//村河长或者巡河员或者保洁员查询自己的巡河记录
+			 map.put("userId",user.getUserId());
+			 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getMyRoutineWorks");
+		 }   	 
+    	 export(request, response, maps, map, user.getUserName()+"下级","userRoutineInfo");
+    	 
+     }
+
+     private void export(HttpServletRequest request, HttpServletResponse response,
+		Map<String, List<PatrolCatalogModel>> maps, JSONObject map,String exportNm,String xmlName) throws Exception {
+		List<PatrolCatalogModel> m  = routineSerivce.selectList(map);
+	    for(PatrolCatalogModel patrol:m){
+ 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+ 			patrol.setsPatrolTm(df.format(patrol.getPatrolTm()));
+ 			patrol.setsPatrolEndTm(df.format(patrol.getPatrolEndTm()));
+ 			if(StringUtils.isNotBlank(patrol.getPatrolTmLt())){
+ 				int s = Integer.parseInt(patrol.getPatrolTmLt());
+ 				if(s > 60){
+ 					patrol.setPatrolTmLt(s/60+"分"+s%60+"秒");
+ 				}else{
+ 					patrol.setPatrolTmLt(s+"秒");
+ 				}
+ 			}else{
+ 				patrol.setPatrolTmLt("0秒");
+ 			}
+ 			if(StringUtils.isNotBlank(patrol.getPatrolMileage())){
+ 				DecimalFormat format= new DecimalFormat("#.00");
+	 			double mileage = Double.parseDouble(patrol.getPatrolMileage());
+	 			if(mileage == 0.0){
+	 				patrol.setPatrolMileage("0米");
+	 			}else{
+		 			if(mileage > 1000){
+		 				patrol.setPatrolMileage(format.format(mileage/1000)+"千米");
+		 			}else{
+		 				patrol.setPatrolMileage(format.format(mileage)+"米");
+		 			}
+	 			}
+ 			}
+ 		}
+ 		maps.put("m",m);
+ 		String title="巡河记录表";
+ 		JxlsUtils.export(maps, title, xmlName,request, response);
+	}
+}
+

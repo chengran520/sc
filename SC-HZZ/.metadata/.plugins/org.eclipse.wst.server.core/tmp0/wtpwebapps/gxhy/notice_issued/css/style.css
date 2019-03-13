@@ -1,0 +1,59 @@
+.github.ribbon {
+	position: fixed;
+	display: block;
+	top: 40px;
+	right: 0;
+	border: 0;
+	z-index: 1001;
+}
+
+.prettyprint {
+	padding: 10px!important;
+}
+
+#wrap {
+	padding-top: 70px;
+}
+
+#home h1 {
+	margin-bottom: 30px;
+}
+#demo,
+#examples,
+#support,
+#download {
+	padding-top: 40px;
+}
+.selecteddiv{
+	font-size:15px;
+	font-weight:bold;
+	padding:3px;
+	spacing-letter:1px;
+}
+.col-xs-2{
+	margin-top:83px;
+}
+#search_rightAll{
+	margin:10px 0;
+	background-color: #009f95;
+	color:#fff;
+}
+
+#search_rightSelected{
+	margin:10px 0;
+	background-color: #009f95;
+	color:#fff;
+}
+#search_leftSelected{
+	margin:10px 0;
+	background-color: #009f95;
+	color:#fff;
+}
+#search_leftAll{
+	margin:10px 0;
+    background-color: #009f95;
+	color:#fff;
+}
+.glyphicon glyphicon-backward{
+	color: white;
+}

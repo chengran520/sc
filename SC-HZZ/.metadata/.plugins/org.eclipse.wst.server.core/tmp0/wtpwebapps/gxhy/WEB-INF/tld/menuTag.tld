@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+                        "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+<taglib>
+	<tlibversion>1.2</tlibversion>
+	<jspversion>1.1</jspversion>
+	<shortname>menu</shortname>
+	<uri>/GXHY_MENU</uri>
+	<tag>
+		<name>indexHeaderMenu</name>
+		<tagclass>com.gxhy.app.tag.IndexHeaderMenuTag</tagclass>
+		<bodycontent>empty</bodycontent>
+		<info>对header.jsp中菜单自定义标签</info>
+	</tag>
+</taglib>

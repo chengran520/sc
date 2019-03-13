@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.routine.persistence.ExposureMapper">	
+    <!-- 获取曝光列表-->
+    <select id="getExposureList" resultType="com.gxhy.routine.domain.ExposureModel">
+    	 <include refid="ExposureInfo"></include>
+		 <include refid="QueryInfo"></include>
+		 ORDER BY  E.REPORT_TIME DESC
+    </select>
+    
+    
+    <!--条件  -->
+    <sql id="QueryInfo">
+	     <where>
+	        <if test="type != null and type != ''">
+	            AND E.POLLUTION_TYPE=#{type}
+	        </if>
+	        <if test="startTime != null and startTime != ''">
+				AND E.REPORT_TIME>= #{startTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND  E.REPORT_TIME &lt;= #{endTime}
+			</if>
+	     </where>
+    </sql>
+    
+    
+    <!-- 基本查询语句 -->
+    <sql id="ExposureInfo">    	
+        SELECT E.RV_NM,E.ACCEPTID,(SELECT DICT_NM FROM SYS_DICT  WHERE DICT_TP='BZTP'  AND DICT_VAL= E.POLLUTION_TYPE) AS pollutionTypeNm,
+        E.REPORT_TIME,URL,E.STATUS FROM IOT_EXPOSURE E LEFT JOIN (SELECT I.ACCEPTID,MAX(I.URL) AS url FROM IOT_IMAGE_V_S
+  		I GROUP BY I.ACCEPTID) I ON E.ACCEPTID=I.ACCEPTID
+    </sql>
+
+    <!--获取曝光详情-->
+    <select id="getExposureDetail"  resultType="com.gxhy.routine.domain.ExposureModel">
+       SELECT E.*,(SELECT DICT_NM FROM SYS_DICT  WHERE DICT_TP='BZTP'  AND DICT_VAL= E.POLLUTION_TYPE) AS pollutionTypeNm
+       FROM IOT_EXPOSURE E LEFT JOIN (SELECT I.ACCEPTID,MAX(I.URL) AS url FROM IOT_IMAGE_V_S I GROUP BY I.ACCEPTID) I ON 
+       E.ACCEPTID=I.ACCEPTID WHERE E.ACCEPTID=#{acceptId}
+    </select>
+       
+    <!--  查询某个处理事件的图片-->
+    <select id="getImageVideoDetail" resultType="com.gxhy.routine.domain.ImageVideoModel">
+         SELECT URL FROM IOT_IMAGE_V_S WHERE ACCEPTID=#{acceptId} AND TYPE=11
+    </select>
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.sysmanager.persistence.MenuMapper">
+    <resultMap id="MenuResultMap"  type="com.gxhy.sysmanager.domain.MenuModel">
+	    <result column="UUID"       jdbcType="VARCHAR" property="uuid" />
+	    <result column="MENU_ID"    jdbcType="VARCHAR" property="menuId" />
+	    <result column="P_MENU_ID"  jdbcType="VARCHAR" property="pmenuId" />
+	    <result column="MENU_NM"    jdbcType="VARCHAR" property="menuNm" />
+	    <result column="MENU_URL"    jdbcType="VARCHAR" property="menuUrl" />
+	    <result column="PMENUNM"    jdbcType="VARCHAR" property="pMenuNm" />
+	    <result column="SORT"         jdbcType="INTEGER" property="sort" />
+    </resultMap>
+   
+   <!--菜单列表  -->
+   <select id="getMenuList"  resultMap="MenuResultMap">
+      SELECT M.UUID,M.MENU_ID,M.MENU_NM,M.MENU_URL,M.SORT,M.P_MENU_ID,(SELECT MENU_NM FROM SYS_MENU WHERE MENU_ID =M. P_MENU_ID) AS PMENUNM FROM SYS_MENU M
+      <where>
+	       <if test="keyword!= null and keyword != ''">
+	 		M.MENU_ID  LIKE '%${keyword}%' or  M.MENU_NM  LIKE '%${keyword}%'  
+		   </if>
+      </where>
+      ORDER BY M.P_MENU_ID,M.SORT DESC
+   </select>
+   <!-- 树形菜单  -->
+   <select id="getMenuZtree" resultType="com.gxhy.sysmanager.domain.MenuResultModel">
+       SELECT MENU_ID AS id,P_MENU_ID AS pid,MENU_NM AS name  FROM SYS_MENU 
+   </select>
+   
+   <!--查询某角色的菜单树 -->
+   <select id="getMenuByRole" resultType="com.gxhy.sysmanager.domain.MenuResultModel">
+	   SELECT M.MENU_ID AS id,P_MENU_ID AS pid,  M.MENU_NM AS name FROM SYS_ROLE_MENU RM
+	   INNER JOIN SYS_MENU M
+	   ON RM.MENU_ID=M.MENU_ID
+	   WHERE RM.ROLE_ID=#{roleId}
+   </select>
+ 
+   <!--  增加菜单-->
+   <select id="saveMenu">
+       INSERT INTO SYS_MENU(UUID,MENU_ID,MENU_NM,P_MENU_ID,MENU_URL,SORT)
+       VALUES(#{uuid},#{menuId},#{menuNm},#{pmenuId},#{menuUrl},#{sort})
+   </select>
+   
+   <!-- 修改菜单 -->
+   <update id="updateMenu">
+       UPDATE SYS_MENU SET MENU_ID=#{menuId},MENU_NM=#{menuNm},P_MENU_ID=#{pmenuId},MENU_URL=#{menuUrl},SORT=#{sort}
+       WHERE UUID=#{uuid}
+   </update>
+   
+   <!-- 删除菜单 -->
+   <delete id="deleteMenu">
+      DELETE FROM SYS_MENU WHERE UUID=#{uuid}
+   </delete>
+   
+   <!-- 保存角色菜单关系 -->
+   <insert id="SaveRole_Menu">
+      INSERT INTO SYS_ROLE_MENU(ROLE_ID,MENU_ID)VALUES(#{roleId},#{menuId})
+   </insert>
+   
+   <!-- 删除指定角色拥有的权限 -->
+   <delete id="deleteMenuByRole">
+      DELETE FROM SYS_ROLE_MENU WHERE ROLE_ID=#{roleId}
+   </delete>
+   
+   <!-- 根据菜单id删除关系-->
+   <select id="deleteMenu_Role">
+      DELETE FROM SYS_ROLE_MENU WHERE MENU_ID=#{menuId}
+   </select>
+   
+   <!--查询某个菜单详情  -->
+   <select id="selectMenuById" resultMap="MenuResultMap">
+      SELECT UUID,MENU_ID,P_MENU_ID,MENU_NM,MENU_URL,SORT FROM  SYS_MENU WHERE UUID=#{uuid}
+   </select>
+   
+   <!--  查询菜单名称-->
+   <select id="selectMenuName" resultMap="MenuResultMap">
+      SELECT MENU_ID,MENU_NM,MENU_URL FROM SYS_MENU WHERE MENU_ID=#{menuId}
+   </select>
+   
+   <!--修改关系表  -->
+   <update id="UpdateMenuRole">
+   	  UPDATE SYS_ROLE_MENU SET ROLE_ID=#{roleId} WHERE ROLE_ID=#{sroleId}
+   </update>
+</mapper>

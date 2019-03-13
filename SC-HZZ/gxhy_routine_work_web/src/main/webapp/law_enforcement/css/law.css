@@ -1,0 +1,40 @@
+.tdt-bottom{
+	display: none;
+}
+.clear{ 
+	clear:both
+} 
+.law-div1{
+	float: left;
+	width: 45%;
+	overflow: auto;
+}
+.law-div-div1{
+	height: 310px;
+	width: 100%;
+	border-bottom: 1px solid #dbdbdb;
+}
+#container{
+    margin: 10px 14px 0px 11px;
+    position: relative;
+    border-top: 0px;
+}
+#leftContent{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+#rightContent{
+	margin-left: 210px;
+    color: #000000;
+}
+#leftContent img{
+    height: 200px;
+    width: 200px;
+}
+.hzz_p{
+	color: #737373;
+}
+.pa{
+	color:#B23AEE;;
+}

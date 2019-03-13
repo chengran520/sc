@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.file.persistence.FileMapper">
+    <resultMap  id="file"  type="com.gxhy.file.domain.FileModel" >
+        <result column="UUID" jdbcType="VARCHAR" property="uuid" />
+		<result column="FILE_ID" jdbcType="VARCHAR" property="fileId" />
+		<result column="FILE_TITLE" jdbcType="VARCHAR" property="fileTitle" />
+		<result column="FILE_CONTENT" jdbcType="VARCHAR" property="fileContent" />
+		<result column="FILE_TYPE" jdbcType="INTEGER" property="fileType" />
+		<result column="CREAT_TM" jdbcType="TIMESTAMP" property="creatTime" />
+		<result column="UPDATE_TM" jdbcType="TIMESTAMP" property="updateTime" />
+		<result column="FILE_OPEN" jdbcType="INTEGER" property="fileOpen" />
+		<result column="FILE_GRADE_TYPE" jdbcType="INTEGER" property="fileGradeType" />
+		<result column="ISSUSER" jdbcType="VARCHAR" property="issuser" />
+   </resultMap>
+   
+	<!--  条件-->
+    <sql id="queryFile">
+        <if test="startTime != null and startTime != ''">
+			AND CREAT_TM >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND CREAT_TM &lt;= #{endTime}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND FILE_TITLE LIKE '%${keyword}%'
+		 </if>
+	</sql>
+  
+    <!-- 增加制度文件 -->
+    <insert id="saveFile">
+       insert into SYS_SYSFILE(UUID,FILE_ID,FILE_TITLE,FILE_CONTENT,FILE_TYPE,CREAT_TM,UPDATE_TM,ISSUSER,FILE_OPEN,FILE_GRADE_TYPE)
+       values(#{uuid},#{fileId},#{fileTitle},#{fileContent},#{fileType},#{creatTime},#{updateTime},#{issuser},#{fileOpen},#{fileGradeType})
+    </insert>
+    
+    <!--修改制度文件-->
+	<update id="updateFile">
+	    UPDATE SYS_SYSFILE SET FILE_TITLE=#{fileTitle},FILE_CONTENT=#{fileContent},FILE_TYPE=#{fileType},UPDATE_TM=#{updateTime},ISSUSER=#{issuser},FILE_OPEN=#{fileOpen},FILE_GRADE_TYPE=#{fileGradeType}
+	    WHERE UUID=#{uuid}
+	</update>
+	
+      <!--条件查询  -->
+    <select id="getFileList" resultMap="file">
+         SELECT UUID,FILE_ID,FILE_TITLE,FILE_TYPE,UPDATE_TM,ISSUSER,CREAT_TM,FILE_CONTENT FROM SYS_SYSFILE
+         WHERE 1=1
+         <include refid="queryFile"></include>
+         ORDER BY UPDATE_TM DESC
+    </select>
+	
+	<!--详情查询  -->
+	<select id="fileDeatil" resultMap="file">
+	     SELECT UUID,FILE_ID,ISSUSER,FILE_TITLE,FILE_CONTENT,FILE_TYPE,CREAT_TM,FILE_GRADE_TYPE,FILE_OPEN  FROM SYS_SYSFILE 
+	     WHERE UUID=#{uuid}
+	</select>
+	
+	<!--删除信息  -->
+	<delete id="deleteSystem">
+	   DELETE FROM SYS_SYSFILE  WHERE UUID=#{uuid}
+	</delete>
+	
+	<!-- 查询最发布的制度文件 -->
+	<select id="getSystems" resultMap="file">
+		 SELECT UUID,FILE_ID,FILE_TITLE,FILE_TYPE,UPDATE_TM,ISSUSER,CREAT_TM,FILE_CONTENT FROM SYS_SYSFILE
+         ORDER BY UPDATE_TM DESC
+	</select>
+	
+	<!--查询文件  -->
+	<select id="selectSysFile" resultMap="file">
+	   SELECT FILE_CONTENT  FROM SYS_SYSFILE  WHERE UUID=#{uuid}
+	</select>
+</mapper>

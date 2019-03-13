@@ -1,0 +1,44 @@
+package com.gxhy.routine.webmodel;
+
+public class ResultModel {
+	
+  private String addvnm;
+  
+  private String roleId;
+  
+  private String month;
+  
+  private String uuid;
+
+	public String getAddvnm() {
+		return addvnm;
+	}
+	
+	public void setAddvnm(String addvnm) {
+		this.addvnm = addvnm;
+	}
+	
+	public String getRoleId() {
+		return roleId;
+	}
+	
+	public void setRoleId(String roleId) {
+		this.roleId = roleId;
+	}
+	
+	public String getMonth() {
+		return month;
+	}
+	
+	public void setMonth(String month) {
+		this.month = month;
+	}
+	
+	public String getUuid() {
+		return uuid;
+	}
+	
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+}

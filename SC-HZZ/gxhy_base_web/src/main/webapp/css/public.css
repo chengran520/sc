@@ -1,0 +1,23 @@
+.btns{
+	background-color:#009f95;
+	color:#fff;
+}
+#roleDes::-webkit-input-placeholder{
+	/* color:#999; */
+}
+.ztree{
+	width:100%;
+    overflow-y: auto;
+}
+
+.ztree::-webkit-scrollbar {
+	width:5px;
+	height:10px;
+}
+.ztree::-webkit-scrollbar-track     {
+	background:#B3B3B3;
+}
+.ztree::-webkit-scrollbar-thumb{
+	background:#1C86EE;
+	border-radius:4px;
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datamonitor.persistence.SewageMapper">
+
+  <!-- 获取排污口信息 -->
+  <select id="getSewages" resultType="com.gxhy.datamonitor.domain.SewageModel">
+     SELECT W.UUID uuid,W.ADCD adcd,W.NAME name,W.UNIT unit,W.UNIT_ADDRESS unitAddress,W.STAND stand,COMP_DT compDt,W.INDUSTRY 
+     industry,W.OUTPUT output,W.WATER_INTAKE waterIntake,W.WATER_DEPT waterDept,W.ENVIR_DEPT envirDept,W.IS_PROTECT isProtect,
+     W.LTTD lttd,W.LGTD lgtd,W.ADDRESS address,W.RV_CD rvCd,W.WFZ_NM wfzNm,W.EMIS_TP emisTp,W.DES_RHHFWSL desRhhfwsl,W.APP_RHHFWSL 
+     appRhhfwsl,W.REA_RHHFWSL reaRhhfwsl,W.STANDARD standard,W.POLLUTANT pollutant,W.RHHFWSL rhhfwsl,W.REMARK remark,SCALE scale,
+     D.ADDVNM addvnm,B.RV_NM rvNm FROM HZZBAK_SYS_DB.dbo.WQ_PDO_B   W  LEFT JOIN ST_ADDVCD_D D ON W.ADCD=D.ADDVCD LEFT JOIN ST_RIVER_B B
+     ON W.RV_CD=B.RV_CD
+     <where>
+        <if test="keyword!= null and keyword != ''">
+			AND (W.NAME LIKE '%${keyword}%'  OR RV_USERNM LIKE '%${keyword}%')
+	    </if>
+     </where>
+  </select>
+
+</mapper>
+

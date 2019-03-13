@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.busine.persistence.BusineMapper">
+   <!-- 待处理事件-->
+    <select id="pendingBusine" resultType="com.gxhy.busine.domain.BusineModel">
+    	<include refid="sqlQuery"></include>
+    	 AND (B.BUSINE_STATUS='1' or B.BUSINE_STATUS='2')
+    	 ORDER BY B.CREATE_TM DESC 
+    </select>
+    
+    <!-- 已处理事件 -->
+     <select id="handledBusine" resultType="com.gxhy.busine.domain.BusineModel">
+    	<include refid="sqlQuery"></include>
+    	  AND (B.BUSINE_STATUS='3' or B.BUSINE_STATUS='4')
+   	    ORDER BY B.CREATE_TM DESC
+    </select>
+    
+    <!--条件查询  -->
+    <select id="getBusinesByQuery" resultType="com.gxhy.busine.domain.BusineModel">
+       <include refid="sqlQuery"></include>
+       <include refid="condition"></include>
+    </select>
+    
+    <!-- 上次处理情况 -->
+    <select id="getLastHandle" resultType="com.gxhy.busine.domain.HandleBusineModel">
+        SELECT U.USER_NAME AS lastHandleUserNm,HANDLE_VIEW,URL AS handleUrl FROM (SELECT * FROM IOT_WORKFLOW WHERE BUSINE_ID=#{busineId} AND HANDLE_TM=
+        (SELECT MAX(I.HANDLE_TM) FROM IOT_WORKFLOW I WHERE I.BUSINE_ID=BUSINE_ID))AS W LEFT JOIN SYS_USER U ON W.LAST_HANDLE_USERID=U.USER_ID  LEFT JOIN 
+        IOT_BUSINE_IMAGE M  ON W.WORKFLOW_ID=M.WORKFLOW_ID
+    </select>
+    
+    <!--获取事件图片 -->
+    <select id="getBusineImgs"  resultType="string">
+    	SELECT URL FROM IOT_BUSINE_IMAGE WHERE BUSINE_ID=#{busineId} AND TYPE='00'
+    </select>
+    
+    <!-- 新增流程 -->
+    <insert id="insertWorkFlow">
+    	INSERT INTO IOT_WORKFLOW (WORKFLOW_ID,BUSINE_ID,HANDLE_USERID,LAST_HANDLE_USERID,HANDLE_TM,STATUS,HANDLE_VIEW)
+    	VALUES(#{workFlowId},#{busineId},#{handleUserId},#{lastHandleUserId},#{handleTm},#{status},#{handleView})
+    </insert>
+
+	<!--更新事件状态-->
+   <update id="updateBusineStatus">
+ 		UPDATE IOT_BUSINE_ACCEPT SET BUSINE_STATUS=#{busineStatus},UPDATE_TM=#{updateTm} WHERE  BUSINE_ID=#{busineId}
+   </update>
+  
+  	<!--获取当前用户的下级用户--> 
+   	<select id="getBusineUser"  resultType="com.gxhy.base.domain.SysUsers">
+        SELECT  USER_ID,USER_NAME FROM SYS_USER WHERE USER_ADDVCD LIKE '%${addvcd}%' AND USER_ID!=#{userId}  AND  JOB  in
+          <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+         </foreach>
+  	</select>
+  	
+  	<select id="getBusineUser2"  resultType="com.gxhy.base.domain.SysUsers"> 
+        SELECT  USER_ID,USER_NAME FROM SYS_USER WHERE USER_ADDVCD LIKE '%${addvcd}%'  AND USER_ID!=#{userId}
+  	</select>
+    
+   <!--  查询事件个数-->
+   <select id="getBusineUserCount" resultType="int">
+        SELECT  count(U.USER_ID) FROM  SYS_USER U  LEFT JOIN SYS_USER_ROLE R  ON U.USER_ID=R.USER_ID 
+        WHERE USER_ADDVCD LIKE '%${addvcd}%'  AND U.USER_ID!=#{userId}   AND JOB!=10  AND R.ROLE_ID=#{roleId}
+   </select>
+   
+   
+    <select id="getBusineUserCount2"  resultType="int">
+        SELECT count(U.USER_ID) FROM  SYS_USER U  LEFT JOIN SYS_USER_ROLE R ON U.USER_ID=R.USER_ID 
+         WHERE (USER_ADDVCD LIKE '%${addvcd}%' AND U.USER_ID!=#{userId}    AND JOB!=10  AND R.ROLE_ID=#{roleId})
+        or  U.JOB='14'  OR U.JOB='13'
+  	</select>
+  	
+  	
+   <!--  查询时间最久的-->
+   <select id="getBigTimeWorkFlow" resultType="com.gxhy.busine.domain.BusineModel">
+       SELECT LAST_HANDLE_USERID  FROM IOT_WORKFLOW  WHERE  HANDLE_TM= (SELECT MAX(HANDLE_TM) FROM  IOT_WORKFLOW WHERE 
+       BUSINE_ID=#{busineId}) 
+   </select>
+   
+   <!-- 饼状图 -->
+   <select id="getBusinesEcharts" resultType="com.gxhy.busine.domain.BusineTypeModel">
+  	  SELECT COUNT(B.BUSINE_ID)as value,DICT_NM as name FROM SYS_DICT D INNER JOIN IOT_BUSINE_ACCEPT B  ON D.DICT_VAL=B.BUSINE_TYPE
+	  AND D.DICT_TP=#{dictTp}  GROUP BY DICT_VAL,DICT_NM
+   </select>
+   
+   <select id="getBusinesEcharts2" resultType="com.gxhy.busine.domain.BusineTypeModel">
+	   SELECT TOP 3 COUNT(B.BUSINE_ID)as value,DICT_NM as name FROM SYS_DICT D  INNER JOIN IOT_BUSINE_ACCEPT B  ON D.DICT_VAL
+	   =B.BUSINE_TYPE  AND D.DICT_TP=#{dictTp}  GROUP BY DICT_VAL,DICT_NM  ORDER BY value DESC
+   </select>
+   
+   <!-- 时间轴 -->
+   <select id="getTimeAxis" resultType="com.gxhy.busine.domain.TimeAxiesModel">
+   	   SELECT (SELECT U.USER_NAME FROM SYS_USER U WHERE U.USER_ID=W.HANDLE_USERID)AS busineUnm,W.HANDLE_TM,
+	  W.HANDLE_VIEW,(select DICT_NM from SYS_DICT where  DICT_TP='JOB'  AND  DICT_VAL=(SELECT U.job FROM SYS_USER
+	  U WHERE U.USER_ID=W.HANDLE_USERID))as  job,(select DEPT_NM from SYS_DEPT  where  DEPT_ID=(SELECT U.DEPTID
+	  FROM SYS_USER U WHERE U.USER_ID=W.HANDLE_USERID)) AS dept,(SELECT U.USER_NAME FROM SYS_USER U WHERE U.USER_ID
+	  =W.LAST_HANDLE_USERID)AS lastHandleUserNm,W.STATUS,W.WORKFLOW_ID FROM IOT_BUSINE_ACCEPT A  LEFT JOIN IOT_WORKFLOW W  
+	  ON A.BUSINE_ID=W.BUSINE_ID WHERE A.BUSINE_ID=#{busineId}  
+      ORDER BY HANDLE_TM   ASC
+   </select>
+   
+  	<!-- 查询处理人是自己和自己为上次处理人 -->
+   <sql id="sqlQuery">  
+		SELECT B.BUSINE_ID AS busineId,B.CREATE_TM AS createTm,B.BUSINE_UID AS busineUid,(SELECT USER_NAME FROM SYS_USER WHERE USER_ID=B.BUSINE_UID)
+	    AS busineUnm,B.ORIGIN_ID AS originId,(SELECT DICT_NM FROM SYS_DICT WHERE DICT_VAL=B.BUSINE_ORIGIN)AS busineOrigin,(SELECT D.DICT_NM FROM SYS_DICT D WHERE D.DICT_VAL
+	    =B.BUSINE_TYPE AND D.DICT_TP='BZTP')AS busineType,B.BUSINE_ADDRESS AS busineAddress,B.BUSINE_STATUS AS busineStatus,B.BUSINE_DESC AS busineDesc,
+	    (select top 1 LAST_HANDLE_USERID  from IOT_WORKFLOW   where  BUSINE_ID=B.BUSINE_ID  and HANDLE_USERID=#{userId} order by HANDLE_TM desc)as lastHandleUserId,
+		(SELECT top 1 HANDLE_USERID FROM IOT_WORKFLOW WHERE BUSINE_ID=B.BUSINE_ID  AND HANDLE_TM IN(SELECT min(HANDLE_TM) FROM IOT_WORKFLOW WHERE  
+		BUSINE_ID=B.BUSINE_ID))as handleUserIdOne,
+		(select DICT_NM from SYS_DICT where  DICT_TP='JOB'  AND  DICT_VAL=(SELECT U.job FROM SYS_USER
+	    U WHERE U.USER_ID=b.BUSINE_UID))as  job,(select DEPT_NM from SYS_DEPT  where  DEPT_ID=(SELECT U.DEPTID
+	    FROM SYS_USER U WHERE U.USER_ID=b.BUSINE_UID)) AS dept,
+		(SELECT top 1 STATUS FROM IOT_WORKFLOW WHERE BUSINE_ID=B.BUSINE_ID  AND HANDLE_TM IN(SELECT MAX(HANDLE_TM) FROM IOT_WORKFLOW WHERE  
+		BUSINE_ID=B.BUSINE_ID))as status from IOT_BUSINE_ACCEPT B WHERE B.BUSINE_ID IN(SELECT BUSINE_ID FROM IOT_WORKFLOW w
+		LEFT JOIN SYS_USER  U ON U.USER_ID=W.HANDLE_USERID
+		WHERE 1=1
+		<!-- <if test="userJob != null and userJob != ''">
+		 	AND u.JOB=#{userJob}
+	   	</if>
+		 <if test="userJob == 'null' and userJob ==''">
+		 	AND HANDLE_USERID=#{userId} 
+	   	</if> -->
+	   	<choose>			
+	   	  <when test="userJob != null and userJob != ''">		    
+				AND u.JOB=#{userJob}
+	   	  </when>		        
+		  <otherwise>	
+		   	   AND HANDLE_USERID=#{userId}    		
+		  </otherwise>	   
+	   	</choose>
+
+
+		GROUP BY BUSINE_ID) 
+   </sql>
+   
+   <!-- 查询事件的件数 -->
+   <select id="getBusineSize"  resultType="java.lang.Integer">      	
+		SELECT COUNT(a.BUSINE_ID) FROM IOT_BUSINE_ACCEPT a
+		LEFT JOIN IOT_WORKFLOW W
+		ON a.BUSINE_ID = w.BUSINE_ID
+		LEFT JOIN SYS_USER U
+		ON W.HANDLE_USERID=U.USER_ID
+		WHERE 
+		(a.BUSINE_STATUS =1 OR a.BUSINE_STATUS=2)  AND (W.STATUS=1  or  W.STATUS=3)
+		<choose>			
+	   	  <when test="userJob != null and userJob != ''">		    
+				AND u.JOB=#{userJob}
+	   	  </when>		        
+		  <otherwise>	
+		   	   AND HANDLE_USERID=#{userId}    		
+		  </otherwise>	   
+	   	</choose>
+        UNION ALL 
+            SELECT COUNT(B.BUSINE_ID) FROM  IOT_BUSINE_ACCEPT B  WHERE B.BUSINE_ID IN (SELECT BUSINE_ID FROM IOT_WORKFLOW W LEFT JOIN SYS_USER U
+		ON W.HANDLE_USERID=U.USER_ID WHERE 1=1
+		<choose>			
+	   	  <when test="userJob != null and userJob != ''">		    
+				AND u.JOB=#{userJob}
+	   	  </when>		        
+		  <otherwise>	
+		   	   AND HANDLE_USERID=#{userId}    		
+		  </otherwise>	   
+	   	</choose>
+		 GROUP BY BUSINE_ID) AND (b.BUSINE_STATUS='3' OR b.BUSINE_STATUS='4')
+   </select>
+   
+   <!--  增加图片表-->
+   <insert id="insertBusineImage">
+   		INSERT INTO  IOT_BUSINE_IMAGE(IMAGR_ID,BUSINE_ID,WORKFLOW_ID,URL,TYPE) VALUES (#{imageId},#{busineId},#{workFlowId},#{imgUrl},#{type})
+   </insert>
+
+
+   <!--近一周的柱状图 -->
+   <select id="initChart"   resultType="java.lang.Integer">
+	   SELECT  COUNT(BUSINE_ID)AS count1 FROM IOT_BUSINE_ACCEPT   WHERE CREATE_TM BETWEEN   #{startdate0}  AND  #{enddate0}  
+	   UNION ALL
+	   SELECT  COUNT(BUSINE_ID)AS count2  FROM IOT_BUSINE_ACCEPT  WHERE CREATE_TM BETWEEN  #{startdate1}  AND  #{enddate1} 
+	   UNION ALL
+	   SELECT  COUNT(BUSINE_ID)AS count3  FROM IOT_BUSINE_ACCEPT  WHERE CREATE_TM BETWEEN  #{startdate2}  AND  #{enddate2} 
+	   UNION ALL
+	   SELECT  COUNT(BUSINE_ID)AS count4  FROM IOT_BUSINE_ACCEPT  WHERE CREATE_TM BETWEEN  #{startdate3}  AND  #{enddate3} 
+	   UNION ALL
+	   SELECT  COUNT(BUSINE_ID)AS count5  FROM IOT_BUSINE_ACCEPT  WHERE CREATE_TM BETWEEN  #{startdate4}  AND  #{enddate4} 
+	   UNION ALL
+	   SELECT  COUNT(BUSINE_ID)AS count6  FROM IOT_BUSINE_ACCEPT  WHERE CREATE_TM BETWEEN  #{startdate5}  AND  #{enddate5} 
+	   UNION ALL
+	   SELECT  COUNT(BUSINE_ID)AS count7  FROM IOT_BUSINE_ACCEPT  WHERE CREATE_TM BETWEEN  #{startdate6}  AND  #{enddate6} 
+   </select>
+   
+   <!--  查询事件来源分布-->
+   <select id="getSource" resultType="com.gxhy.busine.webmodel.ResultModel">
+      SELECT COUNT(BUSINE_ID) AS value,BUSINE_ORIGIN AS  name FROM IOT_BUSINE_ACCEPT  GROUP BY BUSINE_ORIGIN
+   </select>
+   
+   <!--查询当月投诉统计  -->
+   <select id="initChartZf" resultType="com.gxhy.busine.webmodel.ResultModel">
+ 	   SELECT COUNT(B.BUSINE_ID) as value, D.DICT_NM as name FROM SYS_DICT D  LEFT JOIN IOT_BUSINE_ACCEPT B  ON D.DICT_VAL=
+ 	   B.BUSINE_TYPE  WHERE DICT_TP='BZTP' GROUP BY D.DICT_NM
+   </select>
+   
+   <select id="getChartRate"   resultType="java.lang.Integer">
+     SELECT COUNT(BUSINE_ID) FROM IOT_BUSINE_ACCEPT WHERE BUSINE_STATUS='3' and CREATE_TM between  #{startDate} and  #{endDate}
+       UNION ALL
+     SELECT COUNT(BUSINE_ID) FROM IOT_BUSINE_ACCEPT WHERE  CREATE_TM between  #{startDate} and  #{endDate}
+   </select>
+   
+   <!-- 根据案件来源查询事件列表 -->
+   <select id="getbusins" resultType="java.lang.String">
+      SELECT BUSINE_ID FROM IOT_BUSINE_ACCEPT  WHERE BUSINE_STATUS='1' AND BUSINE_ORIGIN=#{orginId}  AND 
+      BUSINE_ID NOT IN(SELECT LAW_SOURCE FROM IOT_LAW_MENT) 
+   </select>
+   
+   <!--查询未处理事件的个数 执法信息 -->
+   <select id="getCountBusine" resultType="int">
+      SELECT count(BUSINE_ID) FROM IOT_BUSINE_ACCEPT  WHERE BUSINE_STATUS='1' AND BUSINE_ID NOT IN(SELECT LAW_SOURCE FROM IOT_LAW_MENT)
+   </select>
+   
+   <sql id="condition">
+		<if test="busineId != null and busineId != ''">
+	 		AND B.BUSINE_ID  like '%${busineId}%' 
+		</if>
+		<if test="busineUNm != null and busineUNm != ''">
+	 		AND B.BUSINE_UID IN (SELECT USER_ID FROM SYS_USER WHERE USER_NAME LIKE '%${busineUNm}%' )
+		</if>
+		<if test="starttime != null and starttime != ''">
+			 AND B.CREATE_TM >= #{starttime}
+		</if>
+		<if test="endtime != null and endtime != ''">
+			 AND B.CREATE_TM &lt;= #{endtime}
+		</if>
+		<if test="orginType != null and orginType != ''">
+			 AND B.BUSINE_ORIGIN =#{orginType}
+		</if>
+   </sql>
+   <!--修改状态  -->
+   <update id="updateExposure">
+      UPDATE IOT_EXPOSURE  SET STATUS=2  WHERE  ACCEPTID=#{orginId}
+   </update>
+   
+   <!--报表  -->
+   <select id="getBusineStatics"  resultType="com.gxhy.busine.domain.BusineModel">
+    SELECT BUSINE_ID AS busineId,BUSINE_ORIGIN AS busineOrigin,
+    (SELECT DICT_NM FROM SYS_DICT  WHERE DICT_TP='BZTP' AND  BUSINE_TYPE=DICT_VAL)AS busineType,
+    BUSINE_ADDRESS AS busineAddress,BUSINE_DESC AS busineDesc,B.CREATE_TM  AS createTm,U.USER_NAME  AS busineUnm
+	FROM IOT_BUSINE_ACCEPT B
+	LEFT JOIN  SYS_USER  U
+	ON  B.BUSINE_UID=U.USER_ID 
+	WHERE 1=1
+	<include refid="busineSql"></include>
+   </select>
+   
+   <sql id="busineSql">
+        <if test="type != null and type != ''">
+			 AND B.BUSINE_STATUS = #{type}
+		</if>
+		 <if test="busineType != null and busineType != ''">
+			 AND B.BUSINE_TYPE = #{busineType}
+		</if>
+        <if test="startTm != null and startTm != ''">
+			 AND B.CREATE_TM >= #{startTm}
+		</if>
+		<if test="endTm != null and endTm != ''">
+			 AND B.CREATE_TM &lt;= #{endTm}
+		</if>
+   </sql>
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datamonitor.persistence.ReservoirMapper">
+  <!-- 获取山塘信息 -->
+  <select id="getRvvrs"  resultType="com.gxhy.datamonitor.webmodel.ReservoirModel">
+     SELECT I.RSCD,I.RS_NAME,I.ENG_GRAD,I.TOT_CAP,B.HNNM,B.STLC,B.LTTD,B.LGTD,B.DRNA,B.STTP FROM  IA_C_RS  I
+     LEFT JOIN ST_STBPRP_B B
+     ON I.RSCD=B.STCD
+     <where>
+        <if test="keyword != null and keyword != ''">
+		 I.RSCD  like  '%${keyword}%'  OR   I.RS_NAME  like  '%${keyword}%' 
+	    </if>
+     </where>
+     ORDER BY I.TOT_CAP  DESC
+  </select>
+  
+  <!--获取某个水库的基本信息  -->
+  <select id="getRvvrById" resultType="com.gxhy.datamonitor.webmodel.ReservoirModel">     
+	SELECT I.RSCD,I.RS_NAME,I.SIGNER,I.ENG_GRAD,I.TOT_CAP,B.HNNM,B.STNM,B.STLC,B.DRNA,B.ESSTYM,B.STTP,U.USER_NM,
+	B.LTTD,B.LGTD,U.USER_PHONE,U.USER_TP FROM IA_C_RS I LEFT JOIN ST_RV_ST_USER U
+	ON I.RSCD=U.ID 
+	LEFT JOIN ST_STBPRP_B B
+	ON I.RSCD=B.STCD
+	WHERE I.RSCD=#{id} ORDER BY U.USER_TP
+  </select>
+</mapper>

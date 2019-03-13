@@ -1,0 +1,225 @@
+package com.gxhy.datamonitor.domain;
+/**
+ * 排污口实体类
+ * @author chengran
+ *
+ */
+public class SewageModel {
+  
+	private String uuid;
+	
+	private String adcd;
+	
+	private String name;
+	
+	private String unit;
+	
+	private String unitAddress;
+	
+	private String stand;
+	
+	private String compDt;
+	
+	private String industry;
+	
+	private String output;
+	
+	private double waterIntake;
+	
+	private String waterDept;
+	
+	private String envirDept;
+	
+	private String isProtect;	
+	
+	private double  lttd;
+	
+	private double lgtd;
+	
+	private String address;
+	
+	private String rvNm;
+	
+	private String wfzNm;
+	
+	private String emisTp;	
+	
+	private double desRhhfwsl;
+	
+	private double appRhhfwsl;
+	
+	private double reaRhhfwsl;
+	
+	private String standard;
+	
+	private String pollutant;
+	
+    private double rhhfwsl;
+    
+    private String remark;
+    
+    private String scale;
+    
+	public String getUuid() {
+		return uuid;
+	}
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+	public String getAdcd() {
+		return adcd;
+	}
+	public void setAdcd(String adcd) {
+		this.adcd = adcd;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getUnit() {
+		return unit;
+	}
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+	public String getUnitAddress() {
+		return unitAddress;
+	}
+	public void setUnitAddress(String unitAddress) {
+		this.unitAddress = unitAddress;
+	}
+	public String getStand() {
+		return stand;
+	}
+	public void setStand(String stand) {
+		this.stand = stand;
+	}
+	public String getCompDt() {
+		return compDt;
+	}
+	public void setCompDt(String compDt) {
+		this.compDt = compDt;
+	}
+	public String getIndustry() {
+		return industry;
+	}
+	public void setIndustry(String industry) {
+		this.industry = industry;
+	}
+	public String getOutput() {
+		return output;
+	}
+	public void setOutput(String output) {
+		this.output = output;
+	}
+	public double getWaterIntake() {
+		return waterIntake;
+	}
+	public void setWaterIntake(double waterIntake) {
+		this.waterIntake = waterIntake;
+	}
+	public String getWaterDept() {
+		return waterDept;
+	}
+	public void setWaterDept(String waterDept) {
+		this.waterDept = waterDept;
+	}
+	public String getEnvirDept() {
+		return envirDept;
+	}
+	public void setEnvirDept(String envirDept) {
+		this.envirDept = envirDept;
+	}
+	public String getIsProtect() {
+		return isProtect;
+	}
+	public void setIsProtect(String isProtect) {
+		this.isProtect = isProtect;
+	}
+	public double getLttd() {
+		return lttd;
+	}
+	public void setLttd(double lttd) {
+		this.lttd = lttd;
+	}
+	public double getLgtd() {
+		return lgtd;
+	}
+	public void setLgtd(double lgtd) {
+		this.lgtd = lgtd;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public String getRvNm() {
+		return rvNm;
+	}
+	public void setRvNm(String rvNm) {
+		this.rvNm = rvNm;
+	}
+	public String getWfzNm() {
+		return wfzNm;
+	}
+	public void setWfzNm(String wfzNm) {
+		this.wfzNm = wfzNm;
+	}
+	public String getEmisTp() {
+		return emisTp;
+	}
+	public void setEmisTp(String emisTp) {
+		this.emisTp = emisTp;
+	}
+	public double getDesRhhfwsl() {
+		return desRhhfwsl;
+	}
+	public void setDesRhhfwsl(double desRhhfwsl) {
+		this.desRhhfwsl = desRhhfwsl;
+	}
+	public double getAppRhhfwsl() {
+		return appRhhfwsl;
+	}
+	public void setAppRhhfwsl(double appRhhfwsl) {
+		this.appRhhfwsl = appRhhfwsl;
+	}
+	public double getReaRhhfwsl() {
+		return reaRhhfwsl;
+	}
+	public void setReaRhhfwsl(double reaRhhfwsl) {
+		this.reaRhhfwsl = reaRhhfwsl;
+	}
+	public String getStandard() {
+		return standard;
+	}
+	public void setStandard(String standard) {
+		this.standard = standard;
+	}
+	public String getPollutant() {
+		return pollutant;
+	}
+	public void setPollutant(String pollutant) {
+		this.pollutant = pollutant;
+	}
+	public double getRhhfwsl() {
+		return rhhfwsl;
+	}
+	public void setRhhfwsl(double rhhfwsl) {
+		this.rhhfwsl = rhhfwsl;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	public String getScale() {
+		return scale;
+	}
+	public void setScale(String scale) {
+		this.scale = scale;
+	}
+}

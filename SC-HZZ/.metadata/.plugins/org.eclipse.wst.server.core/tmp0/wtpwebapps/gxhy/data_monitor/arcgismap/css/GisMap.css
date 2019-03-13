@@ -1,0 +1,70 @@
+.claro{
+	background-color: #fff;
+    overflow: hidden;
+}
+#map {
+     height: 100%;
+     width: 100%;
+ }
+
+ #BasemapToggle {
+     position: absolute;
+     right: 20px;s
+     top: 20px;
+     z-index: 50;
+ }
+
+ #HomeButton {
+     left: 25px;
+     position: absolute;
+     top: 93px;
+     z-index: 50;
+ }
+
+ #LocateButton {
+     left: 25px;
+     position: absolute;
+     top: 130px;
+     z-index: 50;
+ }
+ 	h3 {
+       margin: 0 0 5px 0;
+       border-bottom: 1px solid #444;
+    }
+    .shadow {
+       box-shadow: 0 0 5px #888;
+    }
+  #feedback {
+     background: #fff;
+     color: #444;
+     position: absolute;
+     font-family: arial;
+     height: 300px;
+     left: 30px;
+     margin: 5px;
+     padding: 10px;
+     top: 30px;
+     width: 300px;
+     z-index: 40;
+  }
+  #note,
+  #hint {
+     font-size: 80%;
+  }
+  #note {
+     font-weight: 700;
+     padding: 0 0 10px 0;
+  }
+  #layerList {
+     width: 200px;
+  }
+  .dojoDndItemOver {
+     background: #ccc;
+  }
+  
+  #rightPane {
+            width:20%;
+        }
+        #legendPane {
+            border:solid #97DCF2 1px;
+        }

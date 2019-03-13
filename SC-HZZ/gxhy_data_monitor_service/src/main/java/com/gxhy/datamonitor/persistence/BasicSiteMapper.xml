@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datamonitor.persistence.BasicSiteMapper">
+	<resultMap id="BasicSiteModelMap" type="com.gxhy.datamonitor.domain.BasicSiteModel">
+		<result column="STCD"    jdbcType="VARCHAR" property="stcd" />
+		<result column="STNM"    jdbcType="VARCHAR" property="stnm" />
+		<result column="RVNM"     jdbcType="VARCHAR" property="rvnm" />
+		<result column="HNNM"   jdbcType="VARCHAR" property="hnnm" />
+		<result column="BSNM"     jdbcType="VARCHAR" property="bsnm" />
+	    <result column="LTTD_OLD"   jdbcType="VARCHAR" property="lttdOld" />
+		<result column="LGTD_OLD"    jdbcType="VARCHAR" property="lgtdOld" />
+		<result column="STLC" jdbcType="VARCHAR" property="stlc" />
+		<result column="ADDVCD"  jdbcType="VARCHAR" property="addvcd" />
+		<result column="MDBZ"  jdbcType="DOUBLE" property="mdbz" />
+		<result column="MDPR"  jdbcType="DOUBLE" property="mdpr" />
+		<result column="DTMNM"  jdbcType="VARCHAR" property="dtmnm" />
+		<result column="DTMEL"  jdbcType="DOUBLE" property="dtmel" />
+		<result column="STTP"  jdbcType="VARCHAR" property="sttp" />
+		<result column="DFRTMS"  jdbcType="INTEGER" property="dfrtms" />
+		<result column="FRITM"  jdbcType="VARCHAR" property="fritm" />
+		<result column="FRGRD"  jdbcType="VARCHAR" property="frgrd" />
+		<result column="EDFRYM"  jdbcType="VARCHAR" property="edfrym" />
+		<result column="BGFRYM"  jdbcType="VARCHAR" property="bgfrym" />
+		<result column="ADMAUTH"  jdbcType="VARCHAR" property="admauth" />
+		<result column="STBK"  jdbcType="VARCHAR" property="stbk" />
+		<result column="PHCD"  jdbcType="VARCHAR" property="phcd" />
+		<result column="SUBNM"  jdbcType="VARCHAR" property="subnm" />
+		<result column="DRNA"  jdbcType="DOUBLE" property="drna" />
+		<result column="STCDT"  jdbcType="VARCHAR" property="stcdt" />
+		<result column="LGTD"  jdbcType="DOUBLE" property="lgtd" />
+		<result column="LTTD"  jdbcType="DOUBLE" property="lttd" />
+		<result column="DTPR"  jdbcType="DOUBLE" property="dtpr" />
+		<result column="ESSTYM"  jdbcType="VARCHAR" property="esstym" />
+		<result column="ATCUNIT"  jdbcType="VARCHAR" property="atcunit" />
+		<result column="LOCALITY"  jdbcType="VARCHAR" property="locality" />
+		<result column="STAZT"  jdbcType="DOUBLE"    property="stazt" />
+		<result column="DSTRVM"  jdbcType="DOUBLE"     property="dstrvm" />
+		<result column="USFL"  jdbcType="VARCHAR"     property="usfl" />
+		<result column="COMMENTS"  jdbcType="VARCHAR"  property="comments" />
+		<result column="MODITIME"  jdbcType="TIMESTAMP" property="modiTime" />
+		<result column="FOLLOW"  jdbcType="INTEGER" property="follow" />
+	</resultMap>
+	
+	<!--查询所有的测站  -->
+	<select id="getBasicSiteList" resultMap="BasicSiteModelMap">
+	  SELECT STCD,STNM,RVNM,HNNM,LGTD,LTTD,STLC,ADDVCD,STTP FROM ST_STBPRP_B  WHERE 1 = 1
+       <if test="sttp!= null and sttp!= ''">
+			AND STTP=#{sttp}
+	   </if>
+       <if test="sttp == null ">
+			AND STTP IN ('PP','ZZ','SP','SZ')
+	   </if>
+	   <if test="stcd != null and stcd != ''">
+	   		AND (STCD LIKE '%${stcd}%' OR STNM LIKE '%${stcd}%')
+	   </if>
+	</select>
+	
+	<!-- 保存基础测站-->
+	<insert id="saveBasicSite">
+	   INSERT INTO ST_STBPRP_B(STCD,STNM,RVNM,HNNM,BSNM,LGTD,LTTD,STLC,STTP,DTMNM,DTMEL,MDPR,FRGRD,EDFRYM,BGFRYM,ATCUNIT,ADMAUTH,LOCALITY,STBK,STAZT,DSTRVM,DRNA,PHCD,USFL,COMMENTS)
+	   VALUES(#{stcd},#{stnm},#{rvnm},#{hnnm},#{bsnm},#{lgtd},#{lttd},#{stlc},#{sttp},#{dtmnm},#{dtmel},#{mdpr},#{frgrd},#{edfrym},#{bgfrym},#{atcunit},#{admauth},#{locality},#{stbk},#{stazt},#{dstrvm},#{drna},#{phcd},#{usfl},#{comments})
+	</insert>
+	
+	<!-- 保存基础测站-->
+	<update id="updateBasicSite">
+		UPDATE ST_STBPRP_B SET STNM = #{stnm},RVNM =#{rvnm},HNNM=#{hnnm},LGTD=#{lgtd},LTTD=#{lttd},STLC=#{stlc},ADDVCD=#{addvcd},STTP=#{sttp}
+		WHERE STCD = #{stcd}
+	</update>
+	
+	<!--删除测站信息 -->
+	<delete id="deleteBasicSite">
+	   DELETE FROM ST_STBPRP_B WHERE STCD=#{stcd}
+	</delete>
+	
+	<!--查询某个基础测站  -->
+	<select id="getSiteById" resultMap="BasicSiteModelMap">
+	  SELECT STCD,STNM,RVNM,HNNM,BSNM,LGTD,LTTD,STLC,STTP,DTMNM,DTMEL,MDPR,FRGRD,EDFRYM,BGFRYM,ATCUNIT,ADMAUTH,LOCALITY,STBK,STAZT,DSTRVM,DRNA,PHCD,USFL,COMMENTS
+	  FROM ST_STBPRP_B WHERE STCD=#{stcd}
+	</select>
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd  
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd
+	http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.1.xsd
+    http://www.springframework.org/schema/cache
+    http://www.springframework.org/schema/cache/spring-cache.xsd">
+  
+    <!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->  
+    <bean id="transactionManager"  
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+        <property name="dataSource" ref="dataSource" />  
+    </bean>  
+      
+    <!-- 配置SqlSessionTemplate -->
+	<bean id="masterSqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+	   <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 配置mybitasSqlSessionFactoryBean -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	
+		<property name="dataSource" ref="dataSource" />
+		<!-- 传参实体 -->
+		<property name="typeHandlers">
+			<list>
+				<bean class="com.gxhy.base.util.type.StringTypeHandler"></bean>
+				<bean class="com.gxhy.base.util.type.DateTypeHandler"></bean>
+				<bean class="com.gxhy.base.util.type.DoubleTypeHandler"></bean>
+				<bean class="com.gxhy.base.util.type.SqlTimestampTypeHandler"></bean>
+				<bean class="com.gxhy.base.util.type.BigDecimalTypeHandler"></bean>
+			</list>
+		</property>
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		<!-- mapper分页 -->
+		<property name="plugins">
+			<list>
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<value>
+							reasonable=true
+							autoRuntimeDialect=true
+							closeConn=true
+						</value>
+					</property>
+				</bean>
+				<bean class="com.github.abel533.mapperhelper.MapperInterceptor">
+					<property name="properties">
+						<value>
+							mappers=com.github.abel533.mapper.Mapper
+						</value>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean> 
+
+    <bean id="rwAnnotationBeanNameGenerator" class="com.gxhy.base.util.RwAnnotationBeanNameGenerator" />
+	 
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.**.**.**.persistence" />
+		<property name="nameGenerator" ref="rwAnnotationBeanNameGenerator" />
+	</bean>
+ 	<bean class="com.gxhy.base.util.SpringUtils" />
+
+</beans>

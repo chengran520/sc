@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.sysmanager.persistence.SysManagerUserMapper">
+  <resultMap id="BaseResultMap" type="com.gxhy.sysmanager.domain.SysManageUser">
+    	<result column="UUID"          jdbcType="VARCHAR" 	    property="uuid" />
+	    <result column="USER_ID"       jdbcType="VARCHAR"       property="userId" />
+	    <result column="USER_NAME"     jdbcType="VARCHAR"    	property="userName" />
+	    <result column="USER_PASSWD"   jdbcType="VARCHAR"    	property="userPassword" />
+	    <result column="USER_SEX"      jdbcType="VARCHAR" 		property="userSex" />
+	    <result column="USER_EMAIL"    jdbcType="VARCHAR" 		property="userEmail" />
+	    <result column="USER_PHONE"    jdbcType="VARCHAR" 		property="userPhone" />
+	    <result column="USER_ADDVCD"   jdbcType="VARCHAR" 		property="userAddvcd" />
+	    <result column="USER_QQ"       jdbcType="VARCHAR" 		property="userQq" />
+	    <result column="USER_ADDRESS" jdbcType="VARCHAR" 		property="userAddress" />
+	    <result column="CREATE_TIME"   jdbcType="VARCHAR" 		property="createTime" />
+        <result column="UPDATE_TIME"   jdbcType="VARCHAR" 	    property="updateTime" />
+	    <result column="IS_CHECK"      jdbcType="INTEGER" 		property="isCheck" />
+	    <result column="DEPTID"        jdbcType="VARCHAR" 		property="deptId" />
+	    <result column="JOB"        jdbcType="INTEGER" 		property="job" />
+	    <result column="REG_TP"        jdbcType="VARCHAR" 		property="regTp" />
+    </resultMap>
+    
+    <resultMap id="RvUserMap" type="com.gxhy.sysmanager.domain.StRvUser">
+	    <result column="RV_CD"   jdbcType="VARCHAR"    	property="rvCd" />
+	    <result column="RV_NM"       jdbcType="VARCHAR"       property="rvNm" />
+	    <result column="USER_ID"       jdbcType="VARCHAR"       property="userId" />
+	    <result column="USER_NAME"     jdbcType="VARCHAR"    	property="userName" />
+    </resultMap>
+    
+    <!-- 用户列表 -->
+    <select id="getUserList"  resultType="com.gxhy.sysmanager.domain.SysManageUser">
+	     <include refid="userInfo"></include>
+		 <include refid="commentUserQuery"></include>
+ 		 ORDER BY U.UPDATE_TIME DESC
+	</select> 
+
+	<!-- 增加用户 -->
+	<insert id="insertUser">
+		 INSERT INTO SYS_USER(UUID,USER_ID,USER_NAME,USER_PASSWD,USER_PHONE,USER_SEX,USER_ADDRESS,CREATE_TIME,UPDATE_TIME,USER_ADDVCD,DEPTID,JOB)
+		 VALUES (#{uuid},#{userId},#{userName},#{userPassword},#{userPhone},#{userSex},#{userAddress},#{createTime},#{updateTime},#{userAddvcd},#{deptId},#{job})
+	</insert>
+		
+    <!--修改用户  -->
+   <update id="updateUser" parameterType="com.gxhy.sysmanager.domain.SysManageUser">
+       UPDATE SYS_USER SET USER_NAME=#{userName}, USER_PHONE=#{userPhone},USER_SEX=#{userSex},USER_ADDRESS=#{userAddress},UPDATE_TIME=#{updateTime}, USER_ADDVCD=#{userAddvcd},DEPTID=#{deptId},JOB=#{job}
+       WHERE UUID=#{uuid}
+    </update>
+    
+    <update id="inertUserVerify">
+       UPDATE SYS_USER SET UPDATE_TIME=#{etm}, IS_CHECK=0,USER_ADDVCD=#{adcd} WHERE USER_ID=#{userId}
+    </update>
+    
+    <update id="updatePwdUserId">
+    	UPDATE SYS_USER SET USER_PASSWD = #{userPwd},UPDATE_TIME=#{etm} WHERE USER_ID = #{userId}
+    </update>
+    
+	<!-- 删除用户 -->
+	<delete id="deleteUser">
+		delete from SYS_USER where UUID=#{uuid}
+	</delete>
+
+    <!--用户详情  -->
+    <select id="detailUser" resultMap="BaseResultMap">
+	    <include refid="userInfo"></include>
+	     where 1 = 1  AND U.UUID=#{uuid}
+    </select>
+    
+    <!--查询用户基本信息  -->
+    <sql id="userInfo">
+        SELECT U.UUID,U.USER_ID,U.USER_NAME,U.USER_ADDVCD,U.IS_CHECK,U.USER_SEX,
+		U.CREATE_TIME,U.UPDATE_TIME,U.USER_PHONE,U.DEPTID ,U.DEPT_NM, U.ADDVNM, U.JOB,(SELECT DICT_NM 
+		FROM SYS_DICT WHERE DICT_TP='JOB' AND DICT_VAL=U.JOB)AS jobName,R.ROLE_NAME,R.ROLE_ID FROM 
+		SYS_USER_ROLE UR RIGHT JOIN  (SELECT U.*, D.DEPT_NM, A.ADDVNM FROM SYS_USER U LEFT JOIN  SYS_DEPT
+		D ON U.DEPTID = D.DEPT_ID  LEFT JOIN  ST_ADDVCD_D A ON U.USER_ADDVCD=A.ADDVCD) U  ON UR.USER_ID
+		=U.USER_ID LEFT JOIN SYS_ROLE R  ON UR.ROLE_ID=R.ROLE_ID
+     </sql>
+      
+     <!-- 查询条件 -->
+     <sql id="commentUserQuery">
+     	 <where>
+			 <if test="adcd !=null and adcd != ''">
+		 	 	AND U.USER_ADDVCD LIKE '${adcd}%' 
+			 </if>
+			 <if test="keyword!= null and keyword != ''">
+			    AND U.USER_ID  LIKE '%${keyword}%' or U.USER_NAME  LIKE '%${keyword}%'  
+			 </if>
+			<if test="phone!= null and phone != ''">
+			 	AND U.USER_PHONE  LIKE '%${phone}%' 
+			</if>
+			<if test="regTp != null and regTp != ''">
+				AND U.REG_TP = #{regTp} AND IS_CHECK = '1'
+			</if>
+     	</where>
+	</sql>
+	
+	<!-- 增加用户角色关系 -->
+	<insert id="insertRoleUser">
+	  	INSERT INTO SYS_USER_ROLE(ROLE_ID,USER_ID) VALUES(#{roleId},#{userId})
+	</insert>
+	
+	<!-- 查询用户是否存在 -->
+	<select id="selectUserById"  resultMap="BaseResultMap">
+	   SELECT UUID,USER_PASSWD  FROM SYS_USER WHERE USER_ID=#{userId}
+	</select>
+	
+	<!-- 保存用户对应河流 -->
+	<insert id="insertRvUser">
+		INSERT INTO ST_RV_USER (UUID,RV_CD,USER_ID,USER_NM) VALUES(#{uuid},#{rvCd},#{userId},#{userName})
+	</insert>
+	
+	<delete id="deleteRvUser">
+		DELETE FROM ST_RV_USER WHERE USER_ID = #{userId}
+	</delete>
+	
+	<!-- 查询用户对应河流 -->
+	<select id="queryRvUser"  resultMap="RvUserMap">
+	   SELECT R.RV_CD,R.USER_ID,R.USER_NM,B.RV_NM FROM ST_RV_USER R ,ST_RIVER_B B WHERE 1 = 1 AND R.RV_CD = B.RV_CD AND USER_ID=#{userId}
+	</select>
+	
+	<!-- 删除用户河流关系 -->
+	<select id="deleteUser_River">
+		DELETE FROM ST_RV_USER WHERE USER_ID=#{userId}
+	</select>
+	
+	<!-- 获取职务列表 -->
+	<select id="getJobList"  resultType="com.gxhy.sysmanager.domain.DictModel">
+	 	SELECT DICT_VAL AS value,DICT_NM AS text  FROM SYS_DICT WHERE DICT_TP='JOB' 
+	</select>
+	 <select id="getUserExport"  resultType="com.gxhy.sysmanager.webmodel.ExportModel">
+	    SELECT U.USER_ID AS userId,U.USER_NAME AS  userName,U.USER_SEX AS  userSex,
+		U.CREATE_TIME AS createTime,U.UPDATE_TIME AS updateTime,U.USER_PHONE AS userPhone,U.DEPT_NM AS  deptNm, U.ADDVNM AS addvnm, U.JOB AS jobName,
+		R.ROLE_NAME AS roleName FROM SYS_USER_ROLE UR RIGHT JOIN  (SELECT U.*, D.DEPT_NM, A.ADDVNM FROM 
+		SYS_USER U LEFT JOIN  SYS_DEPT D ON U.DEPTID = D.DEPT_ID  LEFT JOIN  ST_ADDVCD_D A ON 
+		U.USER_ADDVCD=A.ADDVCD) U  ON UR.USER_ID=U.USER_ID LEFT JOIN SYS_ROLE R  ON UR.ROLE_ID=R.ROLE_ID 
+		<where>
+			 <if test="keyword!= null and keyword != ''">
+			    AND U.USER_ID  LIKE '%${keyword}%' or U.USER_NAME  LIKE '%${keyword}%'  
+			 </if>
+			<if test="phone!= null and phone != ''">
+			 	AND U.USER_PHONE  LIKE '%${phone}%' 
+			</if>
+     	</where>
+ 		 ORDER BY U.UPDATE_TIME DESC
+	</select> 
+	
+	<!-- 查询用户名和id -->
+	<select id="getUsers" resultType="com.gxhy.sysmanager.domain.DictModel">
+	   SELECT USER_ID AS value,USER_NAME AS text FROM SYS_USER 
+	</select>
+	
+	<select id="queryUserNextCounty"  resultType="com.gxhy.sysmanager.domain.DictModel">
+	   	select ADDVCD AS value,ADDVNM AS text from ST_ADDVCD_D where  ADDVCD like '${country}___000%'AND ADDVCD!=#{addvcd}
+	 </select>
+	 
+	 <select id="queryUserNextVillage" resultType="com.gxhy.sysmanager.domain.DictModel">
+	 	select ADDVCD AS value,ADDVNM AS text from ST_ADDVCD_D where  ADDVCD like '${village}___%'AND ADDVCD!=#{addvcd}
+	 </select>
+	 
+	 <!--查询用户是否存在-->
+	 <select id="getCount" resultType="int">
+	    SELECT COUNT(USER_ID) FROM SYS_USER   WHERE USER_ID=#{userId} AND USER_PASSWD=#{password}
+	 </select>
+	 
+	 <!--校验手机号是否已经存在  -->
+	 <select id="checkUserPhone" resultType="int">
+	    SELECT COUNT(USER_ID) FROM SYS_USER WHERE USER_PHONE=#{userPhone}
+	 </select>
+	 
+	 
+	   	<!--获取当前用户的下级用户--> 
+   	<select id="getNextUser"  resultType="com.gxhy.base.domain.SysUsers">
+        SELECT  USER_ID,USER_NAME FROM SYS_USER WHERE USER_ADDVCD LIKE '%${addvcd}%' AND USER_ID!=#{userId}  AND  JOB  in
+          <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+         </foreach>
+  	</select>
+  	
+  	<select id="getNextUser2"  resultType="com.gxhy.base.domain.SysUsers"> 
+        SELECT  USER_ID,USER_NAME FROM SYS_USER WHERE USER_ADDVCD LIKE '%${addvcd}%'  AND USER_ID!=#{userId}
+  	</select>
+
+   <!-- 查询一河一长人员个数 -->
+   <select id="getCounts" resultType="int">
+    select  count(uuid) from SYS_USER   where (job='7' or job = '6' or job ='5')
+	union ALL
+	select  count(uuid) from SYS_USER   where job='8'
+	union ALL
+	select  count(uuid) from SYS_USER   where job='9'
+	union ALL
+	select  count(uuid) from SYS_USER   where job='10'
+	union ALL
+	select  count(uuid) from SYS_USER   where job='11'
+	union ALL
+	select  count(uuid) from SYS_USER   where job='14'
+	union ALL
+	select  count(uuid) from SYS_USER   where  DEPTID  in  ('33','35','37','39','41','43','34','36','38','40')
+	union ALL
+	select  count(uuid) from SYS_USER   where  DEPTID  not in  ('33','35','37','39','41','43','34','36','38','40','28')
+   </select>
+</mapper>

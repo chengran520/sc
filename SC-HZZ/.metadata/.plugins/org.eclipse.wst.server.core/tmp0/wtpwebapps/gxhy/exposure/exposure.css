@@ -1,0 +1,68 @@
+.exposureFat{
+	 width: 100%;
+   overflow-x: hidden;
+    overflow-y: auto;
+    margin-top: 10px;
+    
+}
+#exposure{
+	 width: 96%;
+	padding: 0 2%;
+}
+.dt_div{
+  	width:30%;
+  	height:23.8%;
+	display:inline-block;
+	margin: 20px 0 0 15px;
+}
+
+img{
+	width:175px;
+	height:160px;
+}
+.wordDd{
+	width:38%;
+	margin-left:15px;
+	font-size: 14px;
+    color: #555;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: left;
+}
+ 
+dd{
+	float: left;
+}
+p{
+    margin-bottom: 0px;
+    font-size: 15px;
+    color: #555;
+    font-family: "Microsoft Yahei";
+    line-height: 32px;
+    letter-spacing: 1px;
+}
+a{
+    padding: 5px;
+}
+.sa{
+-webkit-border-radius: 90px;
+-webkit-border-top-right-radius: 25px;
+-webkit-border-bottom-left-radius: 25px;
+-moz-border-radius: 90px;
+-moz-border-radius-topright: 25px;
+-moz-border-radius-bottomleft: 25px;
+border-radius: 90px;
+border-top-right-radius: 25px;
+border-bottom-left-radius: 25px;
+}
+ @media screen and (max-width: 1466px) {
+ 	.dt_div{
+  		width:32%;
+  		height:29.2%;
+ 	}
+ 	p{
+ 		margin:0;
+	    font-size: 14px;
+	    line-height: 28px;
+	}
+}

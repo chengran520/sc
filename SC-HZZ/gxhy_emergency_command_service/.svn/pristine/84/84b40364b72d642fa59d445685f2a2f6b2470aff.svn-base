@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.emergency.persistence.MeetingMapper">
+  <resultMap id="UserResultMap" type="com.gxhy.emergency.domain.AdcdTreeModel">
+    <result column="USER_ID" jdbcType="VARCHAR" property="id" />
+    <result column="USER_NAME" jdbcType="VARCHAR" property="name" />
+    <result column="USER_ADDVCD" jdbcType="VARCHAR" property="pid" />
+  </resultMap>
+ 
+    <select id="getZtreeUsers" resultMap="UserResultMap">
+       SELECT  USER_ID,USER_NAME,USER_ADDVCD FROM SYS_USER
+    </select>
+    
+    <!--申请会议  -->
+    <insert id="insertMeeting">
+       INSERT INTO IOT_MEETING(UUID,MEETINGNAME,APPLYTM,MEETINGSTM,MEETINGETM,VENUE,APPLYMEN,PARTICIPANTS,MEETINGSTATUS)
+      VALUES (#{uuid},#{meetingName},#{applyTm},#{meetingStm},#{meetingEtm},#{venue},#{applyMen},#{paticipants},#{meetingStatus})
+    </insert>
+    
+    <!--  查询会议集合-->
+    <select id="getMeetings" resultType="com.gxhy.emergency.domain.MeetingModel">
+     SELECT UUID,MEETINGNAME,APPLYTM,MEETINGSTM,MEETINGETM,VENUE,(SELECT USER_NAME FROM SYS_USER  WHERE USER_ID=APPLYMEN) AS applyMen,PARTICIPANTS,MEETINGSTATUS FROM IOT_MEETING
+     <where>
+         (APPLYMEN=#{userId}  or PARTICIPANTS like '%${userId}%')
+     	<if test="startTm != null and startTm != ''">
+			 AND APPLYTM >= #{startTm}
+		</if>
+		<if test="endTm != null and endTm != ''">
+			 AND APPLYTM &lt;= #{endTm}
+		</if>
+		<if test="meetingStatus != null and meetingStatus != ''">
+			 AND MEETINGSTATUS= #{meetingStatus}
+		</if>
+     </where>
+      ORDER BY APPLYTM DESC
+    </select>
+       
+    <!--更新会议状态  -->
+    <update id="updateMeeting">
+    	UPDATE IOT_MEETING SET MEETINGSTATUS=#{meetingStatus} WHERE  UUID=#{uuid}
+    </update>
+    
+    <!-- 获取参会人员 -->
+    <select id="getChMens" resultType="com.gxhy.emergency.domain.MeetingModel">
+    	SELECT PARTICIPANTS FROM IOT_MEETING  WHERE UUID=#{uuid}
+    </select>
+</mapper>

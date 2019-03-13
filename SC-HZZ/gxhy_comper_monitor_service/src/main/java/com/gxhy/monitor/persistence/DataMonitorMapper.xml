@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.monitor.persistence.DataMonitorMapper">
+	<resultMap id="RiverModelMap" type="com.gxhy.iot.river.StRiverB">
+		<result column="RV_CD" jdbcType="VARCHAR" property="rvCd" />
+		<result column="RV_NM" jdbcType="VARCHAR" property="rvNm" />
+		<result column="HNNM" jdbcType="VARCHAR" property="hnnm" />
+		<result column="BSNM" jdbcType="VARCHAR" property="bsnm" />
+		<result column="STBK" jdbcType="VARCHAR" property="stbk" />
+		<result column="RV_LT" jdbcType="DOUBLE" property="rvlt" />
+		<result column="DRA_AREA" jdbcType="DOUBLE" property="draArea" />
+		<result column="P_RV_CD" jdbcType="VARCHAR" property="prvCd" />
+		<result column="P_RV_NM" jdbcType="VARCHAR" property="prvNm" />
+		<result column="RV_ON" jdbcType="VARCHAR" property="rvOn" />
+		<result column="RV_ON_LGTD" jdbcType="DECIMAL" property="rvOnLgtd" />
+	    <result column="RV_ON_LTTD" jdbcType="DECIMAL" property="rvOnLttd" />
+		<result column="RV_MH" jdbcType="VARCHAR" property="rvMh" />
+		<result column="RV_MH_LGTD" jdbcType="DECIMAL" property="rvMhLgtd" />
+	    <result column="RV_MH_LTTD" jdbcType="DECIMAL" property="rvMhLttd" />
+		<result column="ADDVCD" jdbcType="VARCHAR" property="addvcd" />
+		<result column="ADDVNM" jdbcType="VARCHAR" property="addvnm" />
+		<result column="CRT_TM" jdbcType="TIMESTAMP" property="crtTm" />
+		<result column="UPD_TM" jdbcType="TIMESTAMP" property="updTm" />
+		<result column="OPER_USER" jdbcType="VARCHAR" property="operUser" />
+		<result column="PREW_ADDES" jdbcType="VARCHAR" property="prewAddes" />
+		<result column="DT" jdbcType="VARCHAR" property="dt" />
+	</resultMap>
+	<resultMap id="RiverQualityMap" type="com.gxhy.monitor.domain.IotWaterQualityModel">
+		<result column="STCD" jdbcType="VARCHAR" property="stcd" />
+		<result column="DO" jdbcType="VARCHAR" property="dos" />
+		<result column="COD" jdbcType="VARCHAR" property="cod" />
+		<result column="NH3" jdbcType="VARCHAR" property="nh" />
+		<result column="TP" jdbcType="VARCHAR" property="tp" />
+		<result column="TM" jdbcType="TIMESTAMP" property="tm" />
+		<result column="DO_QUA" jdbcType="VARCHAR" property="doQua" />
+		<result column="COD_QUA" jdbcType="VARCHAR" property="codQua" />
+		<result column="NH3_QUA" jdbcType="VARCHAR" property="nhQua" />
+		<result column="TP_QUA" jdbcType="VARCHAR" property="tpQua" />
+	</resultMap>
+	<resultMap id="WaterQuaDesMap" type="com.gxhy.monitor.domain.IotWaterQuaDesModel">
+		<result column="QUA_NM" jdbcType="VARCHAR" property="quaNm" />
+		<result column="ONE_VAL" jdbcType="VARCHAR" property="oneVal" />
+		<result column="TWO_VAL" jdbcType="VARCHAR" property="twoVal" />
+		<result column="THREE_VAL" jdbcType="VARCHAR" property="threeVal" />
+		<result column="FOUR_VAL" jdbcType="VARCHAR" property="fourVal" />
+		<result column="FIVE_VAL" jdbcType="VARCHAR" property="fiveVal" />
+		<result column="SIX_VAL" jdbcType="VARCHAR" property="sixVal" />
+	</resultMap>
+	
+	<resultMap id="RvUserMap" type="com.gxhy.iot.river.StRvUser">
+		<result column="RV_CD" jdbcType="VARCHAR" property="rvCd" />
+		<result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+		<result column="USER_NM" jdbcType="VARCHAR" property="userNm" />
+		<result column="JOB" jdbcType="VARCHAR" property="userJob" />
+		<result column="DEPTNM" jdbcType="VARCHAR" property="deptNm" />
+		<result column="USERPHONE" jdbcType="VARCHAR" property="userPhone" />
+		<result column="SEX" jdbcType="VARCHAR" property="sex" />
+	</resultMap>
+	
+	<!-- 获取河道信息 -->
+    <select id="getRiverDataInfo"  resultMap="RiverModelMap">
+		SELECT distinct B.RV_CD,B.RV_NM,B.HNNM,B.BSNM,B.STBK,B.RV_LT,B.DRA_AREA,B.P_RV_CD,B.P_RV_NM,B.RV_ON,B.RV_ON_LGTD,B.RV_ON_LTTD,B.RV_MH,B.RV_MH_LGTD,B.RV_MH_LTTD
+		,B.RV_MH,B.RV_MH_LGTD,B.RV_MH_LTTD,B.ADDVCD,B.CRT_TM,B.UPD_TM,B.OPER_USER,B.PREW_ADDES,A.ADDVNM FROM ST_RIVER_B B  inner join ST_RV_USER R on B.RV_CD = R.RV_CD LEFT JOIN ST_ADDVCD_D A  ON A.ADDVCD=B.ADDVCD WHERE 1 = 1 
+		<if test="userId != null and userId != ''">		
+			AND R.USER_ID = #{userId}
+		</if>
+		<if test="key != null and key != ''">
+			 AND (B.RV_CD LIKE '%${key}%' OR B.RV_NM LIKE '%${key}%')
+		</if>
+		<if test="adcd != null and adcd != ''">
+			AND B.ADDVCD LIKE '%${adcd}%'
+		</if>
+   </select>
+
+   <!-- 获取河流对应的河长信息 -->
+   <select id="getAdcdRiverByRvUser" resultMap="RvUserMap">
+		SELECT R.RV_CD,R.USER_ID,R.USER_NM,U.JOB,U.USER_PHONE AS USERPHONE ,D.DEPT_NM AS DEPTNM,U.USER_SEX AS SEX   FROM ST_RV_USER R LEFT JOIN  
+		SYS_USER U ON R.USER_ID = U.USER_ID LEFT JOIN SYS_DEPT D ON U.DEPTID = D.DEPT_ID WHERE 1 = 1 
+		<if test="rvCd != null and rvCd !=''">
+			AND R.RV_CD = #{rvCd} 
+		</if>
+		AND U.USER_ID!='cmc' AND U.JOB!='14'
+		ORDER BY U.JOB ASC
+	</select>
+	
+	<!-- 水质信息 -->
+   <select id="getRvierQuality" resultMap="RiverQualityMap">
+		SELECT STCD,DO,COD,NH3,TP,TM,DO_QUA,COD_QUA,NH3_QUA,TP_QUA FROM IOT_RIVER_QUALITY WHERE  1 = 1 
+		<if test="stcd != null and stcd != ''">
+			AND STCD = #{stcd} 
+		</if>
+		ORDER BY TM DESC 
+   </select>
+   
+    <!-- 水质类别说明 -->
+    <select id="getWaterQuaDesc" resultMap="WaterQuaDesMap">
+		SELECT QUA_NM,ONE_VAL,TWO_VAL,THREE_VAL,FOUR_VAL,FIVE_VAL,SIX_VAL FROM IOT_QUA_CLA_DESC WHERE  1 = 1 
+    </select>
+</mapper>

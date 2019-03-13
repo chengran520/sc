@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.routine.persistence.RankTopMapper">
+	<resultMap id="RankModelMap" type="com.gxhy.routine.domain.RankTopModel">
+		<result column="RV_CD" jdbcType="VARCHAR" property="rvCd" />
+		<result column="RV_NM" jdbcType="VARCHAR" property="rvNm" />
+		<result column="VAL" jdbcType="INTEGER" property="val" />
+	</resultMap>
+   
+    <!-- 获取各河流的投诉统计-->
+    <select id="getRankTopAllCount" resultType="com.gxhy.routine.domain.RankTopModel">   			
+        select e.RV_CD as rvCd,max(e.rv_nm) as rvNm,max(e.REPORT_TIME) as tm,
+    	(select COUNT(i.RV_CD) from IOT_EXPOSURE i where i.RV_CD=e.RV_CD) as countNum,
+    	(select COUNT(i.RV_CD) from IOT_EXPOSURE i where i.STATUS = 2 and i.RV_CD=e.RV_CD) as colseNum,
+    	(select COUNT(i.RV_CD) from IOT_EXPOSURE i where  i.STATUS = 1  and i.RV_CD=e.RV_CD) as notNum  
+    	from IOT_EXPOSURE e  group by e.RV_CD  	
+    	<if test="sortKey != null and sortKey != ''">
+    		ORDER BY ${sortKey} DESC
+    	</if>
+    </select>
+
+	<!-- 获取河流总的投诉量、已处理量、未处理量 -->
+	<select id="rankTopListToNum" resultMap="RankModelMap">
+		select COUNT(*) as val from IOT_EXPOSURE
+		union all
+		select COUNT(*) as val from IOT_EXPOSURE e where e.STATUS = 2
+		union all
+		select COUNT(*) as val from IOT_EXPOSURE e where e.STATUS = 1
+	</select>
+	
+	<!-- 获取投诉的类型统计 -->
+	<select id="getRankTypeList" resultType="com.gxhy.routine.domain.RankTopModel">
+		select COUNT(e.POLLUTION_TYPE)as val,(select dict_nm from SYS_DICT d where d.DICT_TP = 'BZTP' and d.DICT_VAL =e.POLLUTION_TYPE) as rvNm  from IOT_EXPOSURE  e group by e.POLLUTION_TYPE
+	</select>
+	
+</mapper>

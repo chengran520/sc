@@ -1,0 +1,25 @@
+body{
+	    overflow: hidden;
+	    }
+    
+#btnSaveMsg{
+    background-color: #009f95;
+    border: 0px;
+    color: #fff;
+    width: 74px;
+    height: 36px;
+    border-radius: 6px;
+    text-align: center;
+    position: fixed;
+    bottom: 10px;
+    left: 60%;
+    z-index: 999;
+   }
+.img-circle{
+	margin-left: 50px;
+}
+@media only screen and (max-width:1366px){
+	.img-circle{   			
+		margin-left:28px;
+	}
+}

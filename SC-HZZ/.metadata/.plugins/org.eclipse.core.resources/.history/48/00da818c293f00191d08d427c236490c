@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datamonitor.persistence.SewageMapper">
+
+	<resultMap id="resultMap" type="com.gxhy.datamonitor.domain.SewageModel">
+		<result column="UUID" jdbcType="VARCHAR" property="uuid" />
+		<result column="ADCD" jdbcType="VARCHAR" property="adcd" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="UNIT" jdbcType="VARCHAR" property="unit" />
+		<result column="UNIT_ADDRESS" jdbcType="VARCHAR" property="unitAddress" />
+		<result column="STAND" jdbcType="VARCHAR" property="stand" />
+		<result column="COMP_DT" jdbcType="VARCHAR" property="compDt" />
+		<result column="INDUSTRY" jdbcType="VARCHAR" property="industry" />
+		<result column="OUTPUT" jdbcType="VARCHAR" property="output" />
+		<result column="WATER_INTAKE" jdbcType="DOUBLE" property="waterIntake" />
+		<result column="WATER_DEPT" jdbcType="VARCHAR" property="waterDept" />
+		<result column="ENVIR_DEPT" jdbcType="INTEGER" property="envirDept" />
+		<result column="IS_PROTECT" jdbcType="VARCHAR" property="isProtect" />
+		<result column="LTTD" jdbcType="DOUBLE" property="lttd" />
+		<result column="LGTD" jdbcType="DOUBLE" property="lgtd" />
+		<result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+		<result column="RV_CD" jdbcType="VARCHAR" property="rvCd" />
+		<result column="WFZ_NM" jdbcType="VARCHAR" property="wfzNm" />
+		<result column="EMIS_TP" jdbcType="VARCHAR" property="emisTp" />
+		<result column="DES_RHHFWSL" jdbcType="DOUBLE" property="desRhhfwsl" />
+		<result column="APP_RHHFWSL" jdbcType="DOUBLE" property="appRhhfwsl" />
+		<result column="REA_RHHFWSL" jdbcType="DOUBLE" property="reaRhhfwsl" />
+		<result column="STANDARD" jdbcType="VARCHAR" property="standard" />
+		<result column="POLLUTANT" jdbcType="VARCHAR" property="pollutant" />
+		<result column="RHHFWSL" jdbcType="DOUBLE" property="rhhfwsl" />
+		<result column="REMARK" jdbcType="VARCHAR" property="rhhfwsl" />
+		<result column="SCALE" jdbcType="VARCHAR" property="scale" />
+	</resultMap>
+  <!-- 获取排污口信息 -->
+  <select id="getSewages" resultType="">
+     SELECT W.UUID,W.ADCD,W.NAME,W.UNIT,W.UNIT_ADDRESS,W.STAND,COMP_DT,W.INDUSTRY,W.OUTPUT,W.WATER_INTAKE,W.WATER_DEPT,W.ENVIR_DEPT,
+     W.IS_PROTECT,W.LTTD,W.LGTD,W.ADDRESS,W.RV_CD,W.WFZ_NM,W.EMIS_TP,W.DES_RHHFWSL,W.APP_RHHFWSL,W.REA_RHHFWSL,W.STANDARD,W.POLLUTANT,
+     W.RHHFWSL,W.REMARK,SCALE,D.ADDVNM,B.RV_NM
+     FROM HZZBAK_SYS_DB.dbo.WQ_PDO_B   W
+     LEFT JOIN ST_ADDVCD_D D
+     ON W.ADCD=D.ADDVCD
+     LEFT JOIN ST_RIVER_B B
+     ON W.RV_NM=B.RV_CD
+  </select>
+
+</mapper>
+

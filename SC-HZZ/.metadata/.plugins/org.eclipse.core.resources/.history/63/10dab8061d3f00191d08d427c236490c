@@ -1,0 +1,5 @@
+package Sewage;
+
+public interface SewageMapper {
+
+}

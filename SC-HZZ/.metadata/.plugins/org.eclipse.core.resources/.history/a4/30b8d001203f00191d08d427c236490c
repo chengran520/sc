@@ -1,0 +1,5 @@
+package com.gxhy.datamonitor.service;
+
+public class SewageService {
+
+}

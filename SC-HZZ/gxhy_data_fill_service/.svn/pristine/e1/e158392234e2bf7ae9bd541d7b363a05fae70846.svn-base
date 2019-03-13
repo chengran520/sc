@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datafill.persistence.RiverStaticsMapper">
+	
+	<!-- 获取水情信息 -->
+    <select id="getRiverList"  resultType="com.gxhy.datafill.domain.RiverStatics">
+		SELECT R.STCD,B.STNM,R.TM,R.Z FROM ST_RIVER_R R,ST_STBPRP_B B WHERE R.STCD = B.STCD 
+		<if test="stm != null and stm != ''">
+			AND R.TM >= #{stm}
+		</if>
+		<if test="etm != null and etm != ''">
+			AND R.TM &lt;= #{etm}
+		</if>
+   </select>
+   
+</mapper>

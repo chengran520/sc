@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datamonitor.persistence.PoolMapper">
+  <!-- 获取山塘信息 -->
+  <select id="getPools"  resultType="com.gxhy.datamonitor.webmodel.PoolModel">
+     SELECT I.DAMCD,I.DAMNAME,I.XHST,I.SIGNER,B.HNNM,B.STLC,B.LTTD,B.LGTD,B.DRNA,B.STTP FROM  IA_C_DAMINFO  I
+     LEFT JOIN ST_STBPRP_B B
+     ON I.DAMCD=B.STCD 
+     <where>
+        <if test="keyword != null and keyword != ''">
+		 I.DAMCD  like  '%${keyword}%'  OR   I.DAMNAME  like  '%${keyword}%' 
+	    </if>
+     </where>
+     ORDER BY I.XHST  DESC
+  </select>
+  
+  <!--获取山塘长信息  -->
+  <select id="getPoolUsers" resultType="com.gxhy.datamonitor.webmodel.PoolModel">
+      SELECT USER_NM,USER_PHONE  FROM ST_RV_ST_USER   WHERE ID=#{id}   ORDER BY USER_TP  ASC
+  </select>
+  
+  <!--根据测站id获取山塘 -->
+  <select id="getPoolById"  resultType="com.gxhy.datamonitor.webmodel.PoolModel">
+     SELECT I.DAMCD,I.DAMNAME,I.SIGNER,I.XHST,B.HNNM,B.STNM,B.STLC,B.DRNA,B.ESSTYM,B.STTP,U.USER_NM,
+	 B.LTTD,B.LGTD,U.USER_PHONE,U.USER_TP FROM IA_C_DAMINFO I LEFT JOIN ST_RV_ST_USER U
+	 ON I.DAMCD=U.ID 
+	 LEFT JOIN ST_STBPRP_B B
+	 ON I.DAMCD=B.STCD
+	 WHERE I.DAMCD=#{id} ORDER BY U.USER_TP
+  </select>
+</mapper>

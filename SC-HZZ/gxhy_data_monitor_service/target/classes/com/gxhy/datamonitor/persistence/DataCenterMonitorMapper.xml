@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datamonitor.persistence.DataCenterMonitorMapper">
+	<resultMap id="RiverModelMap" type="com.gxhy.iot.river.StRiverB">
+		<result column="RV_CD" jdbcType="VARCHAR" property="rvCd" />
+		<result column="RV_NM" jdbcType="VARCHAR" property="rvNm" />
+		<result column="HNNM" jdbcType="VARCHAR" property="hnnm" />
+		<result column="BSNM" jdbcType="VARCHAR" property="bsnm" />
+		<result column="STBK" jdbcType="VARCHAR" property="stbk" />
+		<result column="RV_LT" jdbcType="DOUBLE" property="rvlt" />
+		<result column="DRA_AREA" jdbcType="DOUBLE" property="draArea" />
+		<result column="P_RV_CD" jdbcType="VARCHAR" property="prvCd" />
+		<result column="P_RV_NM" jdbcType="VARCHAR" property="prvNm" />
+		<result column="RV_ON" jdbcType="VARCHAR" property="rvOn" />
+		<result column="RV_ON_LGTD" jdbcType="DECIMAL" property="rvOnLgtd" />
+	    <result column="RV_ON_LTTD" jdbcType="DECIMAL" property="rvOnLttd" />
+		<result column="RV_MH" jdbcType="VARCHAR" property="rvMh" />
+		<result column="RV_MH_LGTD" jdbcType="DECIMAL" property="rvMhLgtd" />
+	    <result column="RV_MH_LTTD" jdbcType="DECIMAL" property="rvMhLttd" />
+		<result column="ADDVCD" jdbcType="VARCHAR" property="addvcd" />
+		<result column="ADDVNM" jdbcType="VARCHAR" property="addvnm" />
+		<result column="CRT_TM" jdbcType="TIMESTAMP" property="crtTm" />
+		<result column="UPD_TM" jdbcType="TIMESTAMP" property="updTm" />
+		<result column="OPER_USER" jdbcType="VARCHAR" property="operUser" />
+		<result column="PREW_ADDES" jdbcType="VARCHAR" property="prewAddes" />
+		<result column="DT" jdbcType="VARCHAR" property="dt" />
+	</resultMap>
+	
+	<!-- 获取河流信息 -->
+    <select id="getAllLakes"  resultMap="RiverModelMap">
+		SELECT B.*,D.ADDVNM FROM ST_RIVER_B B left join ST_ADDVCD_D D on B.ADDVCD = D.ADDVCD WHERE 1 = 1 
+		<if test="key != null and key != ''">
+			 AND (RV_CD LIKE '%${key}%' OR RV_NM LIKE '%${key}%')
+		</if>
+		ORDER BY UPD_TM DESC
+   </select>
+   
+   <!-- <select id="exportRiver"  resultType="com.gxhy.iot.river.StRiverB">
+		select RV_CD AS rvCd,RV_NM AS rvNm,HNNM AS hnnm,BSNM AS bsnm,STBK AS stbk,RV_LT AS rvlt,
+		DRA_AREA AS draArea,P_RV_CD AS prvCd,P_RV_NM AS prvNm,RV_ON AS rvOn,RV_ON_LGTD  AS rvOnLgtd,
+		RV_ON_LTTD AS rvOnLttd,RV_MH AS rvMh,RV_MH_LGTD AS rvMhLgtd,RV_MH_LTTD  AS rvMhLttd from ST_RIVER_B  
+		where 1=1
+		<if test="key != null and key != ''">
+			 AND (RV_CD LIKE '%${key}%' OR RV_NM LIKE '%${key}%')
+		</if>
+		ORDER BY UPD_TM DESC
+   </select> -->
+   
+   <!-- 查询没有应急预案的河流-->
+   <select id="getRivers" resultMap="RiverModelMap">
+   	  SELECT RV_CD,RV_NM FROM ST_RIVER_B  WHERE PREW_ADDES IS NULL
+   </select>
+   
+	<!--查询应急预案  -->  
+	<select id="selectLakes" resultType="com.gxhy.datamonitor.domain.PlanStep">
+	 SELECT R.RV_CD AS rvCd, R.RV_NM AS rvNm,(SELECT ADDVNM FROM ST_ADDVCD_D WHERE ADDVCD=R.ADDVCD)AS addvnm,I.NAME AS name,I.STEPCONTENT 
+	 AS stepContent,I.UUID AS uuid,(SELECT USER_NAME FROM SYS_USER WHERE USER_ID=I.REPORTUSER) AS reportUserNM,R.PREW_ADDES AS prewAddes FROM 
+	 ST_RIVER_B R INNER JOIN IOT_PLANSTEP I ON R.RV_CD=I.RV_CD
+	 <where>
+	 	<if test="addvcd != null and addvcd != ''">
+	 	   R.ADDVCD LIKE '${addvcd}%'
+	 	</if>
+	 	<if test="keyword != null and keyword != ''">
+	 	   AND (R.RV_CD LIKE '%${keyword}%' OR R.RV_NM LIKE '%${keyword}%')
+	 	</if>
+	 </where>  
+ 	  ORDER BY I.PLAN_TM  DESC
+	</select>
+	
+    <!-- 增加预案措施 -->
+    <insert id="insertPlanStep">
+     	INSERT INTO IOT_PLANSTEP(UUID,NAME,REPORTUSER,RV_CD) VALUES(#{uuid},#{name},#{reportUser},#{rvCd})
+    </insert>
+    
+    <!--更新预案措施表-->
+    <update id="updatePlanStep">
+    	UPDATE IOT_PLANSTEP SET STEPCONTENT=#{stepContent},PLAN_TM=#{planTm} WHERE UUID=#{uuid}
+    </update>
+    
+    <!--更新河流表上传地址为空  -->
+      <update id="updateRiverPrew">
+        UPDATE ST_RIVER_B SET PREW_ADDES=NULL WHERE RV_CD=#{rvCd}
+      </update>
+      
+    <!-- 删除预案措施表 -->
+    <delete id="deletePlanStep">
+       DELETE FROM IOT_PLANSTEP WHERE UUID=#{uuid}
+    </delete>
+    
+   <!-- 获取河流详情 -->
+   <select id="getLakeDetail"  resultMap="RiverModelMap">
+ 	  SELECT B.RV_CD,RV_NM,RVNM,RV_GRD,ADDVCD,STBK,RV_LT,DRA_AREA,P_RV_CD,P_RV_NM,FTREG_AD,RV_OIGIN,RV_MTH,RVNM_CT,CT,LGTD,LTTD,RV_DETAIL,RV_USERNM,
+      RV_TYPE,RV_U_PHONE,RV_U_UNIT FROM ST_RIVER_B B
+      LEFT JOIN ST_RV_USER U
+	  ON B.RV_CD=U.RV_CD
+	  WHERE B.RV_CD=#{rvcd}
+   </select>
+   
+   <!-- 保存数据 -->
+   <insert id="insertDataFillRiver">
+   		insert into ST_RIVER_B (RV_CD
+           ,RV_NM,HNNM,BSNM,STBK,RV_LT,DRA_AREA
+           ,P_RV_CD,P_RV_NM,RV_ON,RV_ON_LGTD,RV_ON_LTTD
+           ,RV_MH,RV_MH_LGTD,RV_MH_LTTD,ADDVCD,DT,CRT_TM,UPD_TM,OPER_USER) values 
+           (#{rvCd},#{rvNm},#{hnnm},#{bsnm},#{stbk},#{rvLt},#{draArea},#{pRvCd},#{pRvNm},#{rvOn},#{rvOnlgtd},#{rvOnlttd},#{rvMh},
+           #{rvMhlgtd},#{rvMhlttd},#{adcd},#{dt},#{crtTm},#{updTm},#{operUser})
+   </insert>
+   
+   <!-- 修改河湖信息 -->
+   <update id="updateRiverLake">
+      UPDATE ST_RIVER_B 
+      SET RV_NM=#{rvNm},HNNM=#{hnnm},BSNM=#{bsnm},STBK=#{stbk},RV_LT=#{rvLt},DRA_AREA=#{draArea},
+      P_RV_CD=#{pRvCd},P_RV_NM=#{pRvNm},RV_ON=#{rvOn},RV_ON_LGTD=#{rvOnlgtd},RV_ON_LTTD=#{rvOnlttd},RV_MH=#{rvMh},
+      RV_MH_LGTD=#{rvMhlgtd},ADDVCD=#{adcd},RV_MH_LTTD=#{rvMhlttd},OPER_USER=#{operUser},UPD_TM=#{updTm}
+      WHERE RV_CD=#{rvCd}
+   </update>
+   
+   <!-- 河流应急预案 -->
+   <select id="saveOrUpRvPew">
+     merge into st_river_b b using (select * from st_river_b where rv_cd = #{rvCd}) as T on b.rv_cd = t.rv_cd
+ 		when matched then update set prew_addes = #{prewAddes} when not matched then insert (rv_cd,prew_addes) values (#{rvCd},#{prewAddes});
+   </select>
+   
+   <!-- 河流应急预案 -->
+   <select id="selectRvPew" resultMap="RiverModelMap">
+      SELECT RV_CD,PREW_ADDES FROM ST_RIVER_B WHERE RV_CD = #{rvCd}
+   </select>
+   
+   <!--删除河湖信息  -->
+   <delete id="deleteRiverLake">
+      DELETE FROM ST_RIVER_B WHERE RV_CD=#{rvcd}
+   </delete>
+   
+   <!-- 根据河流名称获取河流id -->
+   <select id="getRVCD" resultType="String">
+     SELECT RV_CD FROM ST_RIVER_B WHERE  RV_NM=#{rvnm}
+   </select>
+   
+   <!-- 查询所有的省 -->
+   <select id="getProvince" resultType="com.gxhy.adcd.domain.AdcdModel" >
+         select ADDVCD,ADDVNM from ST_ADDVCD_D where ADDVCD like '__0000000000%' 
+   </select>
+   
+   <!-- 查询所有的市 -->
+   <select id="getCity"  resultType="com.gxhy.adcd.domain.AdcdModel" >
+       select ADDVCD,ADDVNM from ST_ADDVCD_D where ADDVCD  like '${addvcdCity}__00000000%' AND ADDVCD!=#{addvcd}
+   </select>
+   
+    <!-- 查询所有的县 -->
+   <select id="getDistrict"  resultType="com.gxhy.adcd.domain.AdcdModel" >
+       select ADDVCD,ADDVNM from ST_ADDVCD_D where  ADDVCD like '${district}__000000%'AND ADDVCD!=#{addvcd1}
+   </select>
+   
+   <!--查询所有的乡  -->
+   <select id="getCountry"   resultType="com.gxhy.adcd.domain.AdcdModel" >
+   		select ADDVCD,ADDVNM from ST_ADDVCD_D where  ADDVCD like '${country}___000%'AND ADDVCD!=#{addvcd1}
+   </select>
+   
+   <!--查询所有的村  -->
+   <select id="getVillage"   resultType="com.gxhy.adcd.domain.AdcdModel" >
+   		select ADDVCD,ADDVNM from ST_ADDVCD_D where  ADDVCD like '${village}___%'AND ADDVCD!=#{addvcd1}
+   </select>
+
+  <!-- 查询河流编码和河流名称 -->
+  <select id="getRiverData1" resultType="com.gxhy.datamonitor.webmodel.RiverDataModel">
+      SELECT RV_CD AS label  FROM ST_RIVER_B 
+  </select>
+  
+    <select id="getRiverData2" resultType="com.gxhy.datamonitor.webmodel.RiverDataModel">
+      SELECT RV_NM AS label  FROM ST_RIVER_B 
+  </select>
+</mapper>

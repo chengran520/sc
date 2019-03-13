@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd  
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd
+	http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+
+	<!-- service日志切面开始 -->
+	<bean id="logAdvice" class="com.gxhy.base.log.SysLogAdvice">
+		<property name="requiredToLogOpTypes" value="1,2,3"></property><!--需要记录日志的操作类别（针对service层日志） -->
+		<property name="opTypeMap"><!-- 增删改查操作映射 --> 
+			<map>
+				<entry key="1" value="save*,add*,insert*,create*,import*"></entry>
+				<entry key="2" value="del*"></entry>
+				<entry key="3" value="update*,set*,modify*"></entry>
+				<entry key="4" value="get*,query*,select*,list*"></entry>
+			</map>
+		</property>
+	</bean>
+	<!-- controller日志切面开始 -->
+	<bean id="logController" class="com.gxhy.base.log.SysLogAdvice">
+		<property name="requiredToLogOpTypes" value="2"></property><!--需要记录日志的操作类别（针对controller层日志） -->
+		<property name="opTypeMap"><!-- 增删改查操作映射 --> 
+			<map>
+				<entry key="1" value="get*,query*,select*,list*"></entry>
+				<entry key="2" value="login*"></entry>
+			</map>
+		</property>
+	</bean>
+	<aop:config>
+		<!-- service层切面（排除日志自身模块service） -->
+		<aop:pointcut id="service-pc"
+			expression=" execution(* com.gxhy.*.service..*.*(..)) and not execution(* com.gxhy.base.service.*.*(..)) " />
+		<aop:pointcut id="catchException-pc"
+			expression="execution(* com.gxhy.*.controller.*.*(..)) and not execution(* com.gxhy.base.controller.*.*(..))  " />
+		<aop:aspect ref="logAdvice">
+			<aop:around method="serviceAdvice" pointcut-ref="service-pc" />
+		</aop:aspect>
+		<aop:aspect ref="logController">
+			<aop:around method="controllerAdvice" pointcut-ref="service-pc" />
+		</aop:aspect>
+	</aop:config>
+	<!-- 日志切面结束 -->
+	
+	<!-- 手工日志类 -->
+	<bean id="logUtil" class="com.gxhy.base.log.LogUtil"/>
+</beans>
+  

@@ -1,0 +1,54 @@
+ .headerDiv{
+  	height:36px;
+ }
+ .header-content{
+	padding: 10px 20px;
+}
+ #Div0,#Div0_event,#Div0_pollution{
+   width:100%;
+ }
+ #Div1,#Div1_event,#Div1_pollution{
+   float:left;
+   width:25%;
+ }
+  #Div2,#Div2_event,#Div2_pollution{
+    width:75%;
+    float:right;
+  }
+  #pie,#allmap,#map_event,#pie_event,#pie_pollution,#allmap_pollution{
+    width:100%;
+    border:1px solid #eee;
+  }
+  
+::-webkit-scrollbar {
+	width:6px;
+	height:10px;
+}
+::-webkit-scrollbar-track     {
+	background:#B3B3B3;
+}
+::-webkit-scrollbar-thumb{
+	background:#3799ff;
+	border-radius:4px;
+}
+#timeAxis{
+	margin: 0 auto;
+    padding-right: 3px;
+    position: relative;
+    height: 86%;
+    overflow: hidden;
+}
+#timeAxis{
+  overflow: auto;	
+}
+.titlediv{
+	height: 50px;
+    line-height: 50px;
+    font-size: 16px;
+    color: red;
+    padding-left: 8px;
+}
+.getclolr{
+	font-size:12px;
+	color:red;
+}

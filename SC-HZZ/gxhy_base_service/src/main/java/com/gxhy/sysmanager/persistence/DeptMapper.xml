@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.sysmanager.persistence.DeptMapper">
+    <resultMap id="DeptResultMap" type="com.gxhy.sysmanager.domain.DeptModel">
+	    <result column="UUID"      jdbcType="VARCHAR" property="uuid" />
+	    <result column="DEPT_ID"   jdbcType="VARCHAR" property="deptId" />
+	    <result column="DEPT_NM" jdbcType="VARCHAR" property="deptNm" />
+	    <result column="DEPT_PID" jdbcType="VARCHAR" property="deptPId" />
+	    <result column="ORDER_NUM" jdbcType="INTEGER" property="orderNum" />
+	    <result column="CREAT_TM" jdbcType="TIMESTAMP" property="creatTm" />
+    </resultMap>
+    
+ <!--查询部门列表  -->
+ <select id="getDeptList" resultMap="DeptResultMap">
+    SELECT * FROM SYS_DEPT 
+     <where>
+           <if test="keyword!= null and keyword != ''">
+		 	   DEPT_ID  LIKE '%${keyword}%' or DEPT_NM LIKE '%${keyword}%'  
+	       </if>
+      </where>
+      ORDER BY CREAT_TM  DESC
+ </select>
+ 
+ <!-- 查询上级部门 -->
+ <select id="getPDept"  resultMap="DeptResultMap">
+   SELECT DEPT_ID,DEPT_NM FROM SYS_DEPT  WHERE  DEPT_PID='-1'
+ </select>
+ 
+ <!-- 保存部门信息 -->
+ <insert id="saveDept">
+    INSERT INTO SYS_DEPT(UUID,DEPT_ID,DEPT_NM,DEPT_PID,ORDER_NUM,CREAT_TM)
+    VALUES(#{uuid},#{deptId},#{deptNm},#{deptPId},#{orderNum},#{creatTm})
+ </insert>
+ 
+ <!--查询部门详情   -->
+ <select id="deptDetail" resultMap="DeptResultMap">
+    SELECT * FROM SYS_DEPT WHERE UUID=#{uuid}
+ </select>
+ 
+ <!--修改部门信息-->
+ <update id="updateDept">
+   UPDATE SYS_DEPT SET DEPT_ID=#{deptId},DEPT_NM=#{deptNm},DEPT_PID=#{deptPId},
+   ORDER_NUM=#{orderNum},CREAT_TM=#{creatTm} WHERE UUID=#{uuid}
+ </update>
+ 
+ <select id="selectDeptById"  resultType="com.gxhy.base.domain.SysUsers">
+   SELECT USER_ID FROM SYS_USER WHERE 
+   DEPTID=(SELECT DEPT_ID FROM SYS_DEPT WHERE UUID=#{uuid})
+ </select>
+ 
+ <!--删除部门 -->
+ <select id="deleteDept">
+  DELETE FROM SYS_DEPT WHERE UUID=#{uuid}
+ </select>
+ 
+ <!-- ztree下拉选择部门以及人员-->
+ <select id="getTreeDeptUsers" resultType="com.gxhy.sysmanager.domain.ZtreeMenuModel">
+	SELECT DEPT_ID AS id,DEPT_NM AS nm, (CASE DEPT_PID WHEN '-1' THEN '' ELSE '' END) AS pid,
+	NULL AS job FROM SYS_DEPT  WHERE DEPT_ID!=28
+	UNION  ALL
+	SELECT U.USER_ID AS id,U.USER_NAME AS nm,D.DEPT_ID AS pid,
+	(SELECT DICT_NM FROM SYS_DICT  WHERE DICT_VAL=U.JOB AND  DICT_TP='JOB') AS job
+	FROM SYS_DEPT D 
+	LEFT JOIN SYS_USER U
+	ON U.DEPTID=D.DEPT_ID 
+	WHERE DEPTID!=28
+ </select>
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.hydro.persistence.RiverMapper">
+	<resultMap id="RiverModelMap" type="com.gxhy.hydro.webmodel.ResultRiverInfoModel">
+		<result column="STCD" jdbcType="VARCHAR" property="stcd" />
+		<result column="STNM" jdbcType="VARCHAR" property="stnm" />
+		<result column="STLC" jdbcType="VARCHAR" property="stlc" />
+		<result column="STTP" jdbcType="VARCHAR" property="sttp" />
+		<result column="TM" jdbcType="TIMESTAMP" property="tm" />
+		<result column="Z" jdbcType="VARCHAR" property="z" />
+		<result column="Q" jdbcType="VARCHAR" property="q" />
+	</resultMap>
+	
+	<resultMap id="RiverAllMap" type="com.gxhy.iot.river.StRiverB">
+		<result column="RV_CD" jdbcType="VARCHAR" property="rvCd" />
+		<result column="RV_NM" jdbcType="VARCHAR" property="rvNm" />
+		<result column="HNNM" jdbcType="VARCHAR" property="hnnm" />
+		<result column="BSNM" jdbcType="VARCHAR" property="bsnm" />
+		<result column="STBK" jdbcType="VARCHAR" property="stbk" />
+		<result column="RV_LT" jdbcType="DOUBLE" property="rvlt" />
+		<result column="DRA_AREA" jdbcType="DOUBLE" property="draArea" />
+		<result column="P_RV_CD" jdbcType="VARCHAR" property="prvCd" />
+		<result column="P_RV_NM" jdbcType="VARCHAR" property="prvNm" />
+		<result column="RV_ON" jdbcType="VARCHAR" property="rvOn" />
+		<result column="RV_ON_LGTD" jdbcType="DECIMAL" property="rvOnLgtd" />
+	    <result column="RV_ON_LTTD" jdbcType="DECIMAL" property="rvOnLttd" />
+		<result column="RV_MH" jdbcType="VARCHAR" property="rvMh" />
+		<result column="RV_MH_LGTD" jdbcType="DECIMAL" property="rvMhLgtd" />
+	    <result column="RV_MH_LTTD" jdbcType="DECIMAL" property="rvMhLttd" />
+		<result column="ADDVCD" jdbcType="VARCHAR" property="addvcd" />
+		<result column="ADDVNM" jdbcType="VARCHAR" property="addvnm" />
+		<result column="CRT_TM" jdbcType="TIMESTAMP" property="crtTm" />
+		<result column="UPD_TM" jdbcType="TIMESTAMP" property="updTm" />
+		<result column="OPER_USER" jdbcType="VARCHAR" property="operUser" />
+		<result column="DT" jdbcType="VARCHAR" property="dt" />
+	</resultMap>
+	
+	<!-- 根据测站ID获取相应的实时河道信息 -->
+    <select id="getRiverDataInfo"  resultMap="RiverModelMap">
+		SELECT top 1 R.STCD,R.TM,R.Z,R.Q,B.STNM,B.STLC,B.STTP FROM ST_RIVER_R R,ST_STBPRP_B B WHERE 1 = 1 AND R.STCD = B.STCD
+		<if test="stcd != null and stcd != '' ">
+			 AND R.STCD = #{stcd} 
+		</if>
+		ORDER BY R.TM DESC
+   </select>
+   
+   <!-- 根据条件查询列表 -->
+   <select id="getRiverInfoList" resultType="com.gxhy.hydro.webmodel.ResultRiverInfoModel">
+     select a.stcd,a.stnm,a.rvnm,c.z,c.q,c.tm,a.stlc from st_stbprp_b a inner join 
+     (select r.z,r.q,r.tm,r.stcd from  st_river_r  r,(select stcd, MAX(tm) tm,MAX(z) z from st_river_r group by stcd) b where r.stcd=b.stcd and r.tm=b.tm ) c
+     on a.stcd=c.stcd WHERE 1 = 1 
+     <if test="keyword != null and keyword != ''">
+	  	and  (a.stcd like '%${keyword}%' or a.stnm like '%${keyword}%')
+     </if>
+     <if test="startTime!= null and startTime != ''">
+	   	and c.tm >= #{startTime}
+	 </if>
+	 <if test="endTime != null and endTime != ''">
+	   	and c.tm &lt;= #{endTime}
+	</if>
+	   	and  a.STTP in('ZQ','ZZ') order by c.tm desc
+   </select>
+   
+   <!-- 根据测站编码差查询早8点至晚8点的水位数据 -->
+   <select id="getZqlist" resultMap="RiverModelMap">
+ 		select z,q,tm from  st_river_r where stcd=#{stcd}
+ 		<if test="stm!= null and stm != ''">
+	   		and tm >= #{stm}
+		 </if>
+		 <if test="etm != null and etm != ''">
+		   	and tm &lt;= #{etm}
+		</if>
+   </select>
+   
+   <!-- 根据测站编码差查询早8点至晚8点的流量数据  -->
+   <select id="getQlist" resultType="String">
+  	 	select q from  st_river_r where stcd=#{stcd}
+   </select>
+   	
+	<!-- 获取河道信息 -->
+    <select id="getAllRvInfo"  resultMap="RiverAllMap">
+		SELECT B.RV_CD,B.RV_NM,B.HNNM,B.BSNM,B.STBK,B.RV_LT,B.DRA_AREA,B.P_RV_CD,B.P_RV_NM,B.RV_ON,B.RV_ON_LGTD,B.RV_ON_LTTD,B.RV_MH,B.RV_MH_LGTD,B.RV_MH_LTTD
+		,B.RV_MH,B.RV_MH_LGTD,B.RV_MH_LTTD,B.ADDVCD,B.CRT_TM,B.UPD_TM,B.OPER_USER,A.ADDVNM   FROM ST_RIVER_B B LEFT JOIN ST_ADDVCD_D A  ON A.ADDVCD=B.ADDVCD
+        <where>
+			<if test="key != null and key != ''">
+				 AND (B.RV_CD LIKE '%${key}%' OR B.RV_NM LIKE '%${key}%')
+			</if>
+		</where>
+   </select>
+</mapper>

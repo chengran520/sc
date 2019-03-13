@@ -1,0 +1,455 @@
+.col-o{
+	padding: 0 5px;
+}
+.card{
+    position: relative;
+    width: 100%;
+    height: 68px;
+    border-radius: 5px;
+    background-color: #fff;
+    -webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.14);
+    -moz-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.14);
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.14);
+}
+.card span{
+	float: left;
+    width: 100%;
+    color: #555;
+    font-size: 14px;
+    line-height: 24px;
+    margin-top: 5px;
+    text-indent: 1em;
+}
+.card a{
+    font-size: 22px;
+    line-height: 30px;
+    margin-left: 14px;
+}
+.card.blue{
+    border-bottom: 3px solid #439fde;
+}
+.card.green{
+    border-bottom: 3px solid #1bbc98;
+}
+.card.yellow{
+    border-bottom: 3px solid #7B68EE;
+}
+.card.red{
+    border-bottom: 3px solid #e84c3d;
+}
+.card.green_o {
+    border-bottom: 3px solid #36b4c5;
+}
+.card.pink{
+ 	border-bottom: 3px solid #EE82EE;
+}
+.tab_div{
+	background-color: #E8E8E8;
+	overflow: auto;
+    z-index: 1;
+    height: 100%;
+    position: fixed;
+}
+.tab_div::-webkit-scrollbar {
+	width:5px;
+	height:10px;
+}
+.tab_div::-webkit-scrollbar-track     {
+	background:#B3B3B3;
+}
+.tab_div::-webkit-scrollbar-thumb{
+	background:#1C86EE;
+	border-radius:4px;
+}
+
+.headerDiv{
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background-color: #fff;
+}
+.table_div_db{
+    float: left;
+    width: 32%;
+    padding: 1px 16px;
+    border: 1px solid #FFF;
+    background-color: #FFF;
+    margin-left: 10px;
+}
+.table .tb_tr_td_sp{
+	background-color: #FFF;
+}
+.table-hover tr th{
+	background-color: #F0F0F0;
+	border-left: 1px solid #ddd;
+	color: #989898;
+	text-align: center;
+}
+.table-hover .tb_tr_td{
+	border-left: 0px;
+	text-align: left;
+}
+.table-hover .tb_tr_th{
+	border-left: 0px;
+}
+
+.tab_caption{
+	font-size: 16px;
+	padding-top: 6px;
+	padding-left: 10px;
+	margin: 0 0 5px;
+}
+.tb-sx{
+	color: #4eb059;
+}
+.tb-dc{
+	color: #FDAB3D;
+}
+.tb-zf{
+	color: #EC494C;
+}
+.tb-sz{
+	color: #2DCAFE;
+}
+.tb-hy{
+	color: #1C86EE;
+}
+.tb-tz{
+	color: #BA55D3;
+}
+li{
+  list-style-type:none;
+}
+.overViewWrap{
+    padding: 10px;
+    width: 100%;
+}
+.row{
+	margin-right: 10px;
+    margin-left: -24px;
+}
+.tb_tr_td a{
+	text-decoration: none;
+	cursor: default;
+}
+.overViewWrap  ul li{
+	list-style: none;
+}
+ol li, ul li{
+    font-size: 1em;
+    line-height: 1.5em;
+    margin: 0;
+}
+.overViewWrap .panel_cont{
+    -webkit-padding-start: 35px;
+}
+.div_ul{
+	border-top: 1px solid #DBDBDB;
+    overflow: auto;
+    width: 100%;
+}
+.div_ul::-webkit-scrollbar {
+	width:5px;
+	height:10px;
+}
+.div_ul::-webkit-scrollbar-track     {
+	background:#B3B3B3;
+}
+.div_ul::-webkit-scrollbar-thumb{
+	background:#1C86EE;
+	border-radius:4px;
+}
+.div_dc{
+	width: 100%;
+}
+.one_ul{
+      font-family: 'Microsoft YaHei';
+    list-style-type: disc;
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 10px;
+}
+.one_ul li{
+	 line-height: 30px;
+}
+.one_ul a{
+	text-decoration: none;
+}
+.one_ul label {
+    margin-bottom: 0;
+}
+.work-moer{
+	float: right;
+	margin: 0 20px;
+	color: #1C86EE;
+	cursor: pointer;
+}
+.overViewWrap .panel_cont .sta_total{
+	background: #047ACB;
+}
+.overViewWrap .panel_cont .normal{
+	background: #4EB059;
+}
+img{
+    border: 0;
+}
+.overViewWrap .panel_cont li img{
+	vertical-align: top;
+    margin: 5px 18px;
+}
+.overViewWrap .panel_cont .sta_total span{
+    width: 102px;
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+    font-size: 15px;
+}
+.chart_p{
+	color: #436EEE;
+	font-size: 16px;
+	padding-top: 6px;
+	padding-left: 10px;
+	margin: 0 0 5px;
+}
+@media only screen and (max-width:1366px){
+   	.overViewWrap .panel_cont .sta_total span{   			
+	   width: 71px;
+   	}
+}
+.overViewWrap  i{
+	font-style: normal;
+}
+.overViewWrap .panel_cont .sta_total span i{
+	font-size: 40px;
+    display: inline-block;
+    width: 100%;
+    height: 65%;
+    line-height: 60px;
+    text-align: center;
+}
+.overViewWrap .panel_cont li{
+	float: left;
+    margin-right: 10px;
+   width: 16.1%;
+    height: 90px;
+    color: #fff;
+    padding: 6px;
+    border-radius:10px;
+}
+@media only screen and (max-width:1366px){
+   	.overViewWrap .panel_cont li{   			
+	  width: 15.8%;
+   	}
+}
+.overViewWrap .panel_cont .normal span{
+	width: 102px;
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+    font-size: 15px;
+}
+@media only screen and (max-width:1366px){
+   	.overViewWrap .panel_cont .normal span{   			
+	 width: 80px;
+   	}
+}
+.overViewWrap .panel_cont .normal span i{
+	font-size: 40px;
+    display: inline-block;
+    width: 100%;
+    height: 65%;
+    line-height: 60px;
+    text-align: center;
+}
+.overViewWrap .panel_cont .warn span{
+    width: 102px;
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+    font-size: 15px;
+}
+.overViewWrap .panel_cont .warn span i{
+	font-size: 40px;
+    display: inline-block;
+    width: 100%;
+    height: 65%;
+    line-height: 60px;
+    text-align: center;
+}
+.overViewWrap .panel_cont .fault span{
+    width: 116px;
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+    font-size: 15px;
+}
+.overViewWrap .panel_cont .fault span i{
+	font-size: 40px;
+    display: inline-block;
+    width: 100%;
+    height: 65%;
+    line-height: 60px;
+    text-align: center;
+}
+
+
+.overViewWrap .panel_cont .prompt span{
+	width: 102px;
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+    font-size: 15px;
+}
+.overViewWrap .panel_cont .prompt span i{
+	font-size: 40px;
+    display: inline-block;
+    width: 100%;
+    height: 65%;
+    line-height: 60px;
+    text-align: center;
+}
+
+
+.overViewWrap .panel_cont .reult span{
+    width: 102px;
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+    font-size: 15px;
+}
+.overViewWrap .panel_cont .reult span i{
+	font-size: 40px;
+    display: inline-block;
+    width: 100%;
+    height: 65%;
+    line-height: 60px;
+    text-align: center;
+}
+
+.overViewWrap .panel_cont .warn{
+	background: #16B7D4;
+}
+.overViewWrap .panel_cont .fault{
+	background: #FDAB3D;
+}
+.overViewWrap .panel_cont .prompt{
+	background: #EC494C;
+}
+.overViewWrap .panel_cont .reult{
+	background: #9b95c9;
+    margin-right: 0px;
+}
+.tab_move{
+	margin-left: 76%;
+	font-size: 14px;
+	cursor: pointer;
+}
+.tab_move_yc{
+	margin-left: 82%;
+	font-size: 14px;
+	cursor: pointer;
+}
+.tab_move_zf{
+	margin-left: 86%;
+	font-size: 14px;
+	cursor: pointer;
+}
+.tab_move_tz{
+	margin-left: 68%;
+	font-size: 14px;
+	cursor: pointer;
+}
+.tab_move_wa{
+	margin-left: 86.4%;
+	font-size: 14px;
+	cursor: pointer;
+}
+.tb_div{
+	float: left;
+    width: 32.1%;
+    background-color: #fff;
+    margin-left: 15px;
+    overflow: hidden;
+}
+.div_chart_sj{
+	background-color: #fff;
+	width: 24.2%;
+	margin-left: 10px;
+	float: left;
+}
+.div_chart_df{
+	background-color: #fff;
+	width: 24.2%;
+	margin-left: 6px;
+	float: left;
+}
+.div_chart_tf{
+	background-color: #fff;
+	width: 25.5%;
+	margin-left: 6px;
+	float: left;
+}
+
+.div_chart_zf{
+	background-color: #fff;
+	width: 24.2%;
+	margin-left: 6px;
+	float: left;
+}
+.tb_div_zf{
+	background-color: #fff;
+	width: 32%;
+	margin-left10px;
+	float: left;
+	height: 277px;
+}
+.tb_div_tz{
+	background-color: #fff;
+	width: 32%;
+	margin-top: 20px;
+	margin-left: 14px;
+	float: left;
+	height: 291px;
+	display: inline-block;
+}
+.tb_div_wj{
+	background-color: #fff;
+	width: 98%;
+	margin-top: 20px;
+	margin-left: 14px;
+	float: left;
+	height: 291px;
+}
+.one_div{
+	float: left;
+	width: 100%;
+	margin-top: 10px;
+}
+a{
+	text-decoration: none;
+}
+a:HOVER{
+	text-decoration: none;
+}
+@media only screen and (max-width:1366px){
+   	.tab_move{   			
+	   margin-left: 72%;
+   	}
+   	.overViewWrap .panel_cont .fault span{
+   		width: 80px;
+   	}
+ 	.overViewWrap .panel_cont .reult span{   			
+	   width: 80px;
+   	}
+   	.overViewWrap .panel_cont .prompt span{   			
+	   width: 80px;
+   	}
+   	.overViewWrap .panel_cont .warn span{   			
+	  width: 80px;
+   	}
+   	.tb_div_zf{
+   	   width: 32.5%;
+   	}
+}

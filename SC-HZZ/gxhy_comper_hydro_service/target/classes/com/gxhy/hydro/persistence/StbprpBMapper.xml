@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.hydro.persistence.StbprpBMapper">
+	<resultMap id="StbprpBModelMap" type="com.gxhy.hydro.domain.StBprpBModel">
+		<result column="STCD" jdbcType="VARCHAR" property="stcd" />
+		<result column="STNM" jdbcType="VARCHAR" property="stnm" />
+		<result column="RVNM" jdbcType="VARCHAR" property="rvnm" />
+	  	<result column="LGTD" jdbcType="DECIMAL" property="lgtd" />
+	  	<result column="LGTD" jdbcType="DECIMAL" property="lgtd" />
+	    <result column="STLC" jdbcType="VARCHAR" property="stlc" />
+	    <result column="ESSTYM" jdbcType="VARCHAR" property="esstym" />
+	    <result column="ADDVCD" jdbcType="VARCHAR" property="addvcd" />
+	    <result column="ADDVNM" jdbcType="VARCHAR" property="addvnm" />
+	    <result column="STTP" jdbcType="VARCHAR" property="sttp" />
+	    <result column="DRP" jdbcType="DECIMAL" property="drp" />
+	    <result column="Z" jdbcType="DECIMAL" property="z" />
+	    <result column="PTM" jdbcType="TIMESTAMP" property="ptm" />
+	    <result column="ZTM" jdbcType="TIMESTAMP" property="ztm" />
+	    <result column="USFL" jdbcType="VARCHAR" property="channerId" />
+	</resultMap>
+
+	<!-- 获取河道信息对应的测站基础信息 -->
+    <select id="getStBprpBInfo"  resultMap="StbprpBModelMap">
+		SELECT * FROM (
+		SELECT B.STCD,B.STNM,B.RVNM,B.LGTD,B.LTTD,B.ADDVCD,(select ADDVNM FROM ST_ADDVCD_D D WHERE D.ADDVCD = B.ADDVCD) AS ADDVNM,B.STTP,B.USFL AS channerId,Q.TM AS PTM,
+		Q.DRP,S.TM AS ZTM,S.Z FROM ST_STBPRP_B B LEFT JOIN (SELECT R.STCD,R.TM,R.DRP FROM  ST_PPTN_R R ,(SELECT P.STCD,MAX(TM) TM FROM ST_PPTN_R P GROUP BY P.STCD) S WHERE  
+		R.STCD = S.STCD AND R.TM = S.TM ) Q ON B.STCD = Q.STCD LEFT JOIN (SELECT R.STCD,R.TM,R.Z FROM  ST_RIVER_R R ,(SELECT P.STCD,MAX(TM) TM FROM ST_RIVER_R P GROUP BY P.STCD) S
+		WHERE  R.STCD = S.STCD AND R.TM = S.TM ) S ON B.STCD = S.STCD
+		<if test="addvcd != null and addvcd != '' ">
+			 AND B.ADDVCD LIKE '${addvcd}%'
+		</if>
+		 ) T  where  1= 1 
+		<if test ="key != null and key != ''">
+			AND ( T.STCD LIKE '%${key}%' or T.STNM LIKE '%${key}%' )
+		</if>
+	  ORDER BY(CASE STTP WHEN 'SZ' THEN 2 WHEN 'SP' THEN 1 ELSE '' END) DESC
+   </select>
+
+</mapper>

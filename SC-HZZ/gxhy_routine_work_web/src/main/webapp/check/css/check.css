@@ -1,0 +1,96 @@
+.detail-span{
+  background-color:	#009ACD;
+}
+.update-span{
+	background-color:#009688;
+}
+.delete-span{
+	background-color:#FF5722;
+
+}
+.update-span,.delete-span{
+	margin-left:5px;   
+	
+}
+.detail-span,.update-span,.delete-span{
+    border-radius: 2px;
+    padding:5px;
+    border: none;
+}
+.detail-span a,.update-span a,.delete-span a{	
+	white-space: nowrap;
+    text-align: center;
+    font-size: 14px;
+    color:#fff;
+    font-weight: bold;
+}
+#dialog_merit{
+	width: 1400px;
+	position: fixed;
+	margin: 0px auto;
+	top: 0px;
+	left: 0px;
+	bottom: 0px; 
+	right:10px; 
+	z-index: 1050; 
+}
+.status{
+	text-align:center;
+	padding: 2px 4px;
+    border-radius: 3px; 
+    width: 60px;
+    height: 18px;
+    color: rgb(255, 255, 255);
+    font-size: 12px; 
+    font-weight: bold; 
+    background-color: #FF6666;
+}
+.status_span{
+	font-size:14px;
+    text-align: center;
+}
+.st{
+	color:#4876FF;
+	margin-right:4px;
+}
+.leader_table td{
+	padding:0px 5px;
+	font-size:14px;
+}
+.leader_table input{
+	color:black;
+	font-size:16px;
+	font-weight: bold;
+	border:none;
+}
+.leader_table thead tr th{
+	text-align: center;
+}
+
+.leader_table thead tr{
+	height:40px;
+}
+.leader_table tbody tr{
+	height:30px;
+}
+.title_leader{
+	width: 11%;
+	text-align: center;
+}
+.border-tr{
+	border-bottom:1px solid #D6D6D6; 
+}
+.border-tr td{
+	width:258px;
+	height:40px;
+}
+.checkdiv{
+	margin-left:20px;
+	heigth:40px;
+	line-height: 40px;	
+}
+.checkdiv_div{
+	float: left;
+	width:50%;
+	border-bottom: 1px solid #eee; 
+}

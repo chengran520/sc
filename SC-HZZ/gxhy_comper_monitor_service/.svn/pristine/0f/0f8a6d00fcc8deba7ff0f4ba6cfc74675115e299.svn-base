@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gxhy.monitor.persistence.IotRiverBuildMapper" >
+  <resultMap id="BaseResultMap" type="com.gxhy.monitor.domain.IotRiverBuildModel" >
+    <result column="UUID" property="uuid" jdbcType="VARCHAR" />
+    <result column="project_name" property="projectName" jdbcType="VARCHAR" />
+    <result column="build_content" property="buildContent" jdbcType="VARCHAR" />
+    <result column="invest_total" property="investTotal" jdbcType="VARCHAR" />
+    <result column="finish_total_schedule" property="finishTotalSchedule" jdbcType="VARCHAR" />
+    <result column="plan_stime" property="planStime" jdbcType="TIMESTAMP" />
+    <result column="plan_etime" property="planEtime" jdbcType="TIMESTAMP" />
+    <result column="build_unit_name" property="buildUnitName" jdbcType="VARCHAR" />
+    <result column="build_unit_contacts" property="buildUnitContacts" jdbcType="VARCHAR" />
+    <result column="build_unit_contacts_tel" property="buildUnitContactsTel" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="URL" property="url" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    UUID, project_name, build_content, invest_total, finish_total_schedule, plan_stime, 
+    plan_etime, build_unit_name, build_unit_contacts, build_unit_contacts_tel, create_time, 
+    update_time,URL
+  </sql>
+  <select id="getRiverBuildList"  resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from IOT_RIVER_BUILD
+    where  1=1 
+           <if test="keyword!= null and keyword != ''">
+		 	 AND   project_name  LIKE '%${keyword}%' 
+	       </if>
+  </select>
+  
+   <!--查询详情   -->
+ <select id="riverBuildDetail" resultMap="BaseResultMap">
+    SELECT * FROM IOT_RIVER_BUILD WHERE UUID=#{uuid}
+ </select>
+ 
+  <delete id="deleteRiverBuildInfo" >
+    delete from IOT_RIVER_BUILD where UUID=#{uuid}
+  </delete>
+  <insert id="saveRiverBuild">
+    insert into IOT_RIVER_BUILD (UUID, project_name, build_content, 
+      invest_total, finish_total_schedule, plan_stime, 
+      plan_etime, build_unit_name, build_unit_contacts, 
+      build_unit_contacts_tel, create_time, update_time
+      )
+    values (#{uuid,jdbcType=VARCHAR}, #{projectName,jdbcType=VARCHAR}, #{buildContent,jdbcType=VARCHAR}, 
+      #{investTotal,jdbcType=VARCHAR}, #{finishTotalSchedule,jdbcType=VARCHAR}, #{planStime,jdbcType=TIMESTAMP}, 
+      #{planEtime,jdbcType=TIMESTAMP}, #{buildUnitName,jdbcType=VARCHAR}, #{buildUnitContacts,jdbcType=VARCHAR}, 
+      #{buildUnitContactsTel,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+
+  <update id="updateRiverBuild" parameterType="com.gxhy.monitor.domain.IotRiverBuildModel" >
+    update IOT_RIVER_BUILD
+    set 
+      project_name = #{projectName,jdbcType=VARCHAR},
+      build_content = #{buildContent,jdbcType=VARCHAR},
+      invest_total = #{investTotal,jdbcType=VARCHAR},
+      finish_total_schedule = #{finishTotalSchedule,jdbcType=VARCHAR},
+     
+      build_unit_name = #{buildUnitName,jdbcType=VARCHAR},
+      build_unit_contacts = #{buildUnitContacts,jdbcType=VARCHAR},
+      build_unit_contacts_tel = #{buildUnitContactsTel,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP} 
+      where   UUID=#{uuid}
+  </update>
+  
+  <!--查询文件  -->
+  <select id="selectBuild" resultType="string" >
+     SELECT URL FROM IOT_RIVER_BUILD  WHERE UUID=#{uuid}
+  </select>
+  
+  <update id="saveOrUpBuider">
+     UPDATE IOT_RIVER_BUILD  SET URL=#{url}  WHERE UUID=#{uuid}
+  </update>
+</mapper>

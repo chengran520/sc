@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.routine.persistence.MeritPerfMapper">
+	<resultMap id="MeritModelMap" type="com.gxhy.routine.domain.MeritPerfModel">
+		<result column="UUID"             jdbcType="VARCHAR"   property="uuid" />
+		<result column="ADCD"             jdbcType="VARCHAR"   property="adcd" />
+		<result column="RV_CD"            jdbcType="VARCHAR"  property="rvCd" />
+		<result column="RV_NM"            jdbcType="VARCHAR"  property="rvNm" />
+		<result column="RV_USER_ID"       jdbcType="VARCHAR" property="rvUserId" />
+		<result column="MERIT_NM"         jdbcType="VARCHAR"   property="meritNm" />
+		<result column="MERIT_TM"   	  jdbcType="TIMESTAMP"   property="meritTm" />
+		<result column="PLAN_ID"          jdbcType="VARCHAR"   property="planId" />
+		<result column="SOLVE_PRM"        jdbcType="VARCHAR"      property="solvePrm" />
+		<result column="N_SOLVE_PRM"      jdbcType="VARCHAR"    property="NSolvePrm" />
+		<result column="MERIT_STATUS"     jdbcType="VARCHAR" property="meritStatus" />
+		<result column="RCXC_SCORE"       jdbcType="INTEGER" property="rcxcScore" />
+		<result column="SJCLV_SCORE"      jdbcType="INTEGER" property="sjclvScore" />
+		<result column="SZBH_SCORE"       jdbcType="INTEGER" property="szbhScore" />
+		<result column="GZTS_SCORE"       jdbcType="INTEGER" property="gztsScore" />
+		<result column="XCJY_SCORE"       jdbcType="INTEGER" property="xcjyScore" />
+		<result column="JLF_SCORE"        jdbcType="VARCHAR" property="jlfScore" />
+		<result column="LDZH_SCORE"       jdbcType="INTEGER" property="ldzhScore" />
+		<result column="TOTAL_SCORE"      jdbcType="INTEGER"  property="totalScore" />
+		<result column="CREATE_TM"        jdbcType="TIMESTAMP" property="createTm" />
+		<result column="UPDATE_TM"        jdbcType="TIMESTAMP" property="updateTm" />
+		<result column="EXPLAIN"          jdbcType="VARCHAR" property="explain" />
+		<result column="ASSESS"           jdbcType="VARCHAR" property="assess" />
+		<result column="CRE_USER_ID"       jdbcType="VARCHAR" property="creUserId" />
+	</resultMap>
+	
+  <!-- 查询绩效考核列表 -->
+  <select id="getMeritList" resultType="com.gxhy.routine.domain.MeritPerfModel">
+     SELECT UUID,(select addvnm from ST_ADDVCD_D where ADDVCD=ADCD) as addvnm,RV_USER_ID,
+     MERIT_NM,MERIT_TM,MERIT_STATUS,TOTAL_SCORE, (SELECT USER_NAME FROM SYS_USER WHERE 
+     USER_ID=RV_USER_ID)AS rvUserName,(SELECT USER_NAME FROM SYS_USER WHERE USER_ID = CRE_USER_ID)
+     AS creUserName  FROM  IOT_MERIT_PERF  WHERE (RV_USER_ID=#{userId} OR CRE_USER_ID=#{userId}) 
+		<if test="start != null and start != ''">
+			AND MERIT_TM >= #{start}
+		</if>
+		<if test="end != null and end != ''">
+			AND MERIT_TM &lt;= #{end}
+		</if>
+   		<if test="meritNm != null and meritNm != ''">
+   			AND  MERIT_NM   LIKE '%${meritNm}%' 
+   		</if>
+	   ORDER BY MERIT_STATUS DESC
+  </select>
+  
+  <!-- 查询领导打分页面 -->
+  <select id="getLeaderGrades" resultType="com.gxhy.routine.domain.MeritPerfModel">
+      SELECT I.UUID,(select addvnm from ST_ADDVCD_D where ADDVCD=ADCD) as addvnm,MERIT_TM,I.CREATE_TM,I.MERIT_STATUS,I.MERIT_NM,
+      U.USER_NAME AS creUserName  FROM  IOT_MERIT_PERF  I  LEFT JOIN  SYS_USER U  ON 
+      I.CRE_USER_ID=U.USER_ID
+     <where>
+         I.RV_USER_ID=#{userId}  AND  MERIT_STATUS=#{meritStatus}
+	       <if test="keyword != null and keyword != ''">
+	   			AND  U.USER_NAME   LIKE '%${keyword}%' 
+	  	   </if>
+  	 </where>
+  </select>
+  
+  <!-- 我的排名列表 -->
+  <select id="getMyRankList" resultType="com.gxhy.routine.domain.MeritPerfModel">
+     SELECT rankMy = (SELECT COUNT(*)+1 FROM IOT_MERIT_PERF WHERE TOTAL_SCORE > A.TOTAL_SCORE),
+     UUID, ADCD, MERIT_TM, MERIT_NM, TOTAL_SCORE, ASSESS, MERIT_STATUS, (SELECT COUNT(*)+1 FROM 
+     (SELECT CRE_USER_ID, SUM(TOTAL_SCORE) AS SUM FROM IOT_MERIT_PERF  GROUP  BY  CRE_USER_ID)A
+     WHERE SUM>(SELECT SUM(TOTAL_SCORE)AS SUM2 FROM IOT_MERIT_PERF WHERE CRE_USER_ID=#{userId}))
+     AS RANK FROM IOT_MERIT_PERF A WHERE A.CRE_USER_ID=#{userId} AND A.MERIT_STATUS= 1 
+     <if test="keyword != null and keyword != ''">
+ 		 AND  MERIT_NM  LIKE '%${keyword}%' 
+	 </if>
+	 ORDER BY MERIT_TM DESC
+  </select>
+  
+  <!--下级排名列表  -->
+   <select id="getSdtRankList" resultType="com.gxhy.routine.domain.MeritPerfModel">
+       <include refid="getSdtRankListSql"></include>
+	    WHERE  I.MERIT_STATUS=1  AND  U.JOB  in
+       <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+           #{item}
+       </foreach> 
+	   <include refid="selectSql"></include>
+	    ORDER BY MERIT_TM DESC
+   </select>
+  
+  
+   <select id="getSdtRankList2" resultType="com.gxhy.routine.domain.MeritPerfModel">
+       <include refid="getSdtRankListSql"></include>
+	    WHERE  U.USER_ID!=#{userId} AND I.MERIT_STATUS=1   AND U.JOB!=10
+	   <include refid="selectSql"></include>
+	    ORDER BY MERIT_TM DESC
+   </select>
+   
+   
+  <sql id="getSdtRankListSql">
+     SELECT I.UUID, I.MERIT_STATUS, I.ADCD,I.MERIT_NM, I.RCXC_SCORE  AS rcxcScore,I.GZTS_SCORE,I.JLF_SCORE,I.LDZH_SCORE,
+     I.SJCLV_SCORE,I.XCJY_SCORE,I.SZBH_SCORE,I.TOTAL_SCORE,U.USER_NAME  AS creUserName,D.ADDVNM AS addvnm FROM IOT_MERIT_PERF I 
+	 LEFT JOIN SYS_USER U ON I.CRE_USER_ID = U.USER_ID LEFT JOIN ST_ADDVCD_D D  ON I.ADCD=D.ADDVCD
+  </sql>
+  
+   <sql id="selectSql">
+        <if test="createNm != null and createNm != ''">
+   			AND  U.USER_NAME   LIKE '%${createNm}%' 
+	   </if>
+	   <if test="meritNm != null and meritNm != ''">
+   			AND  I.MERIT_NM   LIKE '%${meritNm}%' 
+	   </if>
+   </sql>
+  <!-- 申请绩效考核-->
+  <insert id="insertMerit">
+     INSERT INTO IOT_MERIT_PERF(UUID,ADCD,RV_CD,RV_NM,RV_USER_ID,MERIT_NM,MERIT_TM,SOLVE_PRM,
+     N_SOLVE_PRM,MERIT_STATUS,CREATE_TM,EXPLAIN,CRE_USER_ID) VALUES(#{uuid},#{addvcd},#{rvcd},
+     #{rvnm},#{rvUserId},#{meritNm},#{meritTm},#{solvePrm},#{NSolvePrm},#{meritStatus},#{creatTm},
+     #{explain},#{createId})
+  </insert>
+  
+  <!--修改绩效考核  -->
+    <update id="updateMerit">
+       UPDATE IOT_MERIT_PERF 
+       <trim prefix="set" suffixOverrides=",">
+		  <if test="addvcd!=null">ADCD=#{addvcd},</if>
+		  <if test="rvcd!=null">RV_CD=#{rvcd},</if>
+		  <if test="rvnm!=null"> RV_NM=#{rvnm},</if>
+		  <if test="rvUserId!=null"> RV_USER_ID=#{rvUserId},</if>
+		  <if test="meritNm!=null">  MERIT_NM=#{meritNm},</if>
+		  <if test="meritTm!=null">  MERIT_TM=#{meritTm},</if>
+		  <if test="solvePrm!=null">SOLVE_PRM=#{solvePrm},</if>
+		  <if test="NSolvePrm!=null">N_SOLVE_PRM=#{NSolvePrm},</if>
+		  <if test="updateTm!=null"> UPDATE_TM=#{updateTm},</if>
+		  <if test="explain!=null">EXPLAIN=#{explain},</if>
+		  <if test="meritStatus!=null">MERIT_STATUS=#{meritStatus},</if>
+	      <if test="createId!=null">CRE_USER_ID=#{createId},</if> 
+	      <if test="rcxcScore!=null">RCXC_SCORE=#{rcxcScore},</if> 
+	      <if test="sjclvScore!=null">SJCLV_SCORE=#{sjclvScore},</if> 
+	      <if test="szbhScore!=null">SZBH_SCORE=#{szbhScore},</if> 
+	      <if test="gztsScore!=null">GZTS_SCORE=#{gztsScore},</if> 
+	      <if test="xcjyScore!=null">XCJY_SCORE=#{xcjyScore},</if> 
+	      <if test="jlfScore!=null">JLF_SCORE=#{jlfScore},</if> 
+	      <if test="ldzhScore!=null">LDZH_SCORE=#{ldzhScore},</if> 
+	      <if test="totalScore!=null">TOTAL_SCORE=#{totalScore},</if> 
+	      <if test="assess!=null">ASSESS=#{assess}</if> 
+	   </trim>
+       WHERE UUID=#{uuid}
+    </update>
+  
+   
+  <!--  查询绩效-->
+  <select id="getMeritDetail" resultType="com.gxhy.routine.domain.MeritPerfModel">
+     SELECT UUID,(SELECT ADDVNM FROM ST_ADDVCD_D WHERE ADDVCD=ADCD) AS addvnm,RV_CD,RV_NM, (SELECT DISTINCT  USER_NM FROM ST_RV_USER WHERE 
+      USER_ID=RV_USER_ID) AS rvUserName,RV_USER_ID,MERIT_NM,MERIT_TM,SOLVE_PRM,N_SOLVE_PRM,MERIT_STATUS,CRE_USER_ID,(SELECT DISTINCT USER_NAME
+      FROM SYS_USER WHERE USER_ID=CRE_USER_ID) AS creUserName,EXPLAIN,RCXC_SCORE,SJCLV_SCORE,SZBH_SCORE,GZTS_SCORE,XCJY_SCORE,JLF_SCORE,
+      LDZH_SCORE,TOTAL_SCORE FROM IOT_MERIT_PERF WHERE UUID=#{uuid}
+  </select>
+ 
+  <!--删除绩效  -->
+  <delete id="deleteMerit">
+     DELETE FROM IOT_MERIT_PERF  WHERE UUID=#{uuid}
+  </delete>
+  
+  <select id="getBusineUser"  resultType="com.gxhy.routine.domain.RvUserModel"> 
+        SELECT  USER_ID AS userId,USER_NAME AS userNm FROM SYS_USER WHERE USER_ADDVCD LIKE '%${addvcd}%'  AND USER_ID!=#{userId} 
+         AND   JOB  IN
+          <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+         </foreach>
+  	</select>
+  
+  	
+  	<select id="getBusineUser2"  resultType="com.gxhy.routine.domain.RvUserModel"> 
+        SELECT  USER_ID AS userId,USER_NAME AS userNm FROM SYS_USER WHERE  USER_ID!=#{userId} 
+         AND   JOB  IN
+          <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+         </foreach>
+  	</select>
+  	
+  	
+  	<select id="getBusineUser3"  resultType="com.gxhy.routine.domain.RvUserModel"> 
+        SELECT  USER_ID AS userId,USER_NAME AS userNm FROM SYS_USER WHERE USER_ADDVCD LIKE '%${addvcd}%'  AND USER_ID!=#{userId}
+  	</select>
+  	
+   <!-- 查询所有河流信息 -->
+	  <select id="selectRiverInfoList" resultType="com.gxhy.routine.domain.RiverInfoModel">
+	     SELECT RV_CD,RV_NM FROM ST_RIVER_B
+	  </select>
+	   
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datafill.persistence.DataFillMapper">
+	<resultMap id="RiverModelMap" type="com.gxhy.iot.river.StRiverB">
+		<result column="RV_CD" jdbcType="VARCHAR" property="rvCd" />
+		<result column="RV_NM" jdbcType="VARCHAR" property="rvNm" />
+		<result column="HNNM" jdbcType="VARCHAR" property="hnnm" />
+		<result column="BSNM" jdbcType="VARCHAR" property="bsnm" />
+		<result column="STBK" jdbcType="VARCHAR" property="stbk" />
+		<result column="RV_LT" jdbcType="DOUBLE" property="rvlt" />
+		<result column="DRA_AREA" jdbcType="DOUBLE" property="draArea" />
+		<result column="P_RV_CD" jdbcType="VARCHAR" property="prvCd" />
+		<result column="P_RV_NM" jdbcType="VARCHAR" property="prvNm" />
+		<result column="RV_ON" jdbcType="VARCHAR" property="rvOn" />
+		<result column="RV_ON_LGTD" jdbcType="DECIMAL" property="rvOnLgtd" />
+	    <result column="RV_ON_LTTD" jdbcType="DECIMAL" property="rvOnLttd" />
+		<result column="RV_MH" jdbcType="VARCHAR" property="rvMh" />
+		<result column="RV_MH_LGTD" jdbcType="DECIMAL" property="rvMhLgtd" />
+	    <result column="RV_MH_LTTD" jdbcType="DECIMAL" property="rvMhLttd" />
+		<result column="ADDVCD" jdbcType="VARCHAR" property="addvcd" />
+		<result column="CRT_TM" jdbcType="TIMESTAMP" property="crtTm" />
+		<result column="UPD_TM" jdbcType="TIMESTAMP" property="updTm" />
+		<result column="OPER_USER" jdbcType="VARCHAR" property="operUser" />
+		<result column="DT" jdbcType="VARCHAR" property="dt" />
+	</resultMap>
+	
+	<!-- 获取河道信息 -->
+    <select id="getDataFillRiver"  resultMap="RiverModelMap">
+		SELECT * FROM ST_RIVER_B WHERE 1 = 1 
+		<if test="key != null and key != ''">
+			 AND (RV_CD LIKE '%${key}%' OR RV_NM LIKE '%${key}%')
+		</if>
+		<if test="userId != null and userId != ''">
+			AND OPER_USER = #{userId}
+		</if>
+		ORDER BY UPD_TM DESC
+   </select>
+   
+   <!-- 保存数据 -->
+   <insert id="insertDataFillRiver">
+   		insert into ST_RIVER_B (RV_CD
+           ,RV_NM,HNNM,BSNM,STBK,RV_LT,DRA_AREA
+           ,P_RV_CD,P_RV_NM,RV_ON,RV_ON_LGTD,RV_ON_LTTD
+           ,RV_MH,RV_MH_LGTD,RV_MH_LTTD,ADDVCD,DT,CRT_TM,UPD_TM,OPER_USER) values 
+           (#{rvCd},#{rvNm},#{hnnm},#{bsnm},#{stbk},#{rvLt},#{draArea},#{pRvCd},#{pRvNm},#{rvOn},#{rvOnlgtd},#{rvOnlttd},#{rvMh},
+           #{rvMhlgtd},#{rvMhlttd},#{adcd},#{dt},#{crtTm},#{updTm},#{operUser})
+   </insert>
+   
+   <!-- 删除数据 -->
+   <delete id="deleteDataFillRiver">
+   		DELETE FROM ST_RIVER_B WHERE 1 = 1 AND RV_CD = #{rvCd}
+   </delete>
+</mapper>

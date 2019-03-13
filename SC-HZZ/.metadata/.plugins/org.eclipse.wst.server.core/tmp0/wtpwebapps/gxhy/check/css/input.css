@@ -1,0 +1,25 @@
+input::-webkit-input-placeholder { /* WebKit browsers */
+   font-size:14px;
+   font-weight: normal;
+　　 color:#eee;
+　　}
+
+　input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+	 font-size:14px;
+　　  color:#eee;
+ 	 font-weight: normal;
+　　}
+
+　input::-moz-placeholder { /* Mozilla Firefox 19+ */
+	 font-size:14px;
+　　  color:#eee;
+	 font-weight: normal;
+
+　　}
+
+ input:-ms-input-placeholder { /* Internet Explorer 10+ */
+  font-size:14px;
+　 color:#eee;
+  font-weight: normal;
+
+　　}

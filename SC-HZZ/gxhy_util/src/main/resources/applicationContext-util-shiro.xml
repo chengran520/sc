@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"   
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+	   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd 
+       ">
+ 	
+ 	<!-- 自定义权限控制拦截 -->
+  	<bean id="myShiroRealm" class=" com.gxhy.base.security.realm.GxhySystemRealm">  
+        <property name="cacheManager" ref="cacheManager" />  
+    </bean>  
+ 
+	<!-- 安全管理器 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="myShiroRealm" />  
+		<!-- 设置securityManager安全管理器的rememberMeManager；  -->
+  		<property name="rememberMeManager" ref="rememberMeManager"/>
+	</bean>
+    
+    <!-- shiro 默认缓存 -->
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager" />  
+	
+	<!-- Shiro Filter地址过滤 -->  
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">  
+        <property name="securityManager" ref="securityManager" />  
+        <property name="loginUrl" value="/module/login/login.jsp" />  
+        <property name="unauthorizedUrl" value="/error.jsp" />  
+        <property name="filters">
+            <map>
+                <!--退出过滤器-->
+                <entry key="logout" value-ref="systemLogoutFilter" />
+            </map>
+        </property>
+        <property name="filterChainDefinitions">  
+            <value>  
+              	/module/login/images/**=anon 
+                /module/login/js/**=anon 
+                /module/login/css/**=anon 
+                /images/**=anon 
+                /module/js/**=anon 
+                /common/**=anon
+                /base/api/login/**=anon
+                /base/api/login/user/logout=logout
+                /** = authc 
+            </value>  
+        </property>  
+    </bean>  
+    
+    <!-- 用户注销时清空信息 -->
+    <bean id="systemLogoutFilter" class="com.gxhy.base.security.util.SystemLogoutFilter">
+	     <property name="redirectUrl" value="/module/login/login.jsp" />
+	</bean>
+	
+    <!-- 安全管理,shiro的核心安全接口,这个属性是必须的 -->
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">  
+        <property name="securityManager" ref="securityManager" />  
+    </bean> 
+    
+    <!-- shiro控制bean -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />  
+  
+  	<!-- spring mvc AOP -->
+  	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"  
+        depends-on="lifecycleBeanPostProcessor">  
+        <property name="proxyTargetClass" value="true" />  
+    </bean>  
+    
+	<bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">   
+	    <constructor-arg value="rememberMe"/>   
+	    <property name="httpOnly" value="true"/>   
+	    <property name="maxAge" value="604800"/><!-- 秒 -->
+		<property name="secure" value="true"/>
+	</bean>   
+	
+	<!-- shiro 设置session超时时间。1800000为30分钟 -->
+	<bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+	    <!-- 设置超时时间 -->
+	    <property name="globalSessionTimeout" value="60000"/>
+	    <property name="deleteInvalidSessions" value="true"/>
+	    <property name="sessionValidationSchedulerEnabled" value="true"/>
+	    <property name="sessionIdCookieEnabled" value="true"/>
+	</bean>
+		
+	<!-- rememberMe管理器，cipherKey是加密rememberMe Cookie的密钥；默认AES算法； -->
+	<bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+	    <property name="cipherKey" value="#{T(org.apache.shiro.codec.Base64).decode('4AvVhmFLUs0KTA3Kprsdag==')}"/>
+	     <property name="cookie" ref="rememberMeCookie"/>
+	</bean> 
+	
+	
+</beans>

@@ -1,0 +1,241 @@
+.headerDiv{
+	height: 13%;
+}
+td{
+	white-space:nowrap; 
+}
+@media only screen and (max-width:1366px){
+   	.headerDiv{   			
+	  height: 16%;
+   	}
+}
+.anchorBL{  
+    display:none;  
+}
+.base-popup{
+	box-shadow: 0 0 4px rgba(160, 160, 160, 0.4);
+    position: absolute;
+    background-color: white;
+    border-radius: 0px;
+    z-index: 500;
+    opacity: 0;
+    overflow: hidden;
+}
+.header-content{
+	padding: 12px 20px;
+    border-bottom: 1px solid #dddddd;
+    position: relative;
+    margin: 0px;
+}
+.header-content h2{
+	font-size: 14px;
+    color: #1D2939;
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+.header-content h2 i{
+	font-size: 13px;
+    margin-right: 7px;
+    border-right: 1px dotted #dddddd;
+    padding-right: 10px;
+}
+.fa{
+	display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translate(0, 0);
+}
+.header-content h2 span{
+	font-size: 13px;
+    text-transform: none;
+    color: #999;
+    font-style: italic;
+    vertical-align: middle;
+    letter-spacing: 0;
+    margin-left: 5px;
+}
+#catalog_add{
+	border-right: 0px;
+	cursor: pointer;
+}
+#catalog_update{
+	border-right: 0px;
+	border-left: 0px;
+	cursor: pointer;
+}
+#catalog_delete{
+	border-right: 0px;
+	border-left: 0px;
+	cursor: pointer;
+	
+}
+#catalog_refresh{
+	border-left: 0px;
+	cursor: pointer;
+}
+.text-info{
+	color: #288ce2;
+}
+.input-group-addon{
+	background-color: #fff;
+    border: 1px solid #E5E6E7;
+    border-radius: 1px;
+    color: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    padding: 9px 12px;
+    text-align: center;
+}
+.btn-primary{
+	color: #fff;
+    background-color: #00b0da;
+    border-color: #00b0da;
+    width: 77px;
+    border: 0px;
+}
+.btn{
+	display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+.glyphicon{
+	position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+}
+.fh-breadcrumb {
+	height: calc(100% - 40px);
+	position: relative;
+}
+.status-catalog{
+	width:50px;
+	height:20px;
+	margin-left: 20px;
+	border-radius:8px;
+	color:#FFFFFF;
+	padding-top:1px;
+}
+.traject-catalog{
+	width:100px;
+	height:24px;
+	background-color:#12c3a6;
+	margin-left: 28px;
+	border-radius:30px;
+	color:#FFF;
+	padding-top:2px;
+	cursor: pointer;
+	border: 1px solid #12c3a6; 
+}
+.div-add-view1{
+	width:98%;
+    padding:5px 30px;
+    margin:17px;
+     border:2px solid #CDC8B1; 
+    -webkit-border-radius: 90px;
+	-webkit-border-top-right-radius: 25px;
+	-webkit-border-bottom-left-radius: 25px;
+	-moz-border-radius: 90px;
+	-moz-border-radius-topright: 25px;
+	-moz-border-radius-bottomleft: 25px;
+	border-radius: 90px;
+	border-top-right-radius: 25px;
+	border-bottom-left-radius: 25px;
+}
+.div-add-view{
+	width:98%;
+    padding:5px 30px;
+    margin:17px;
+    border:2px solid #CDC8B1; 
+}
+.title{
+    display:block;
+    width:120px;
+    height:36px;
+    position:relative;
+    top:-20px;
+    text-align: center;
+    background: #6ED293;
+	border:1px;
+	color: #fff;
+	padding-top: 5px;
+	font-size: 16px;
+	font-weight: 500;
+}
+.fa-upload-alt{
+	background: #1C86EE;
+	width: 84px;
+	height: 27px;
+	padding-left: 5px;
+	padding-top: 3px;
+	color: #FFF;
+	cursor: pointer;
+}
+.colorDetail{
+	font-size:14px;
+	font-weight:bold;
+	margin:0px 5px;
+}
+.colorDelete{
+	font-size:14px;
+	font-weight:bold;
+	margin:0px 5px;
+}
+.colorUpdate{
+	font-size:14px;
+	font-weight:bold;
+	margin:0px 5px;
+}
+@media only screen and (max-width:1366px){
+   	.nav-tabs>li{
+		font-size: 13px;
+	}
+}
+
+ .paramTp1{
+	display:block;
+} 
+.paramTp2{
+	display:none;
+} 
+
+::-webkit-scrollbar {
+	width:6px;
+	height:10px;
+}
+::-webkit-scrollbar-track     {
+	background:#B3B3B3;
+}
+::-webkit-scrollbar-thumb{
+	background:#3799ff;
+	border-radius:4px;
+}
+@media screen and (max-width: 1466px){
+	.modal-dialog {
+	    margin: 5px auto;
+	}
+}

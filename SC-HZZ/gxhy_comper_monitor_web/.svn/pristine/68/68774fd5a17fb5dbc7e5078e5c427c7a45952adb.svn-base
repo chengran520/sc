@@ -1,0 +1,43 @@
+#stadiv{
+	float: left;
+	width:10%;
+	height: 100%;
+	overflow-x:hidden;
+	overflow-y:auto;
+}
+.color{
+	background-color: #0ab1f8;
+}
+
+.formatFont{
+	font-size: 14px;
+	font-weight: bold;
+	margin: 0px 5px;
+}
+.divss{
+	font-size:16px;
+	height:40px;
+	line-height:40px;
+	margin:0px 20px;
+	border-bottom: 1px solid #CFCFCF;
+}
+#straFileContent{
+	margin:20px;
+}
+.fr{
+    float: right!important;
+}
+
+.baocun{
+	background-color: #009f95;
+    border: 0px;
+    color: #fff;
+    width: 74px;
+    height: 36px;
+    border-radius: 6px;
+    text-align: center;
+    position: fixed;
+    bottom: 10px;
+    left: 62%;
+    z-index: 999;
+}

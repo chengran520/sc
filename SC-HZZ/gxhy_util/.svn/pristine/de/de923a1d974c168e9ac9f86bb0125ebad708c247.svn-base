@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd  
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd
+	http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.1.xsd
+    http://www.springframework.org/schema/cache
+    http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+
+	<bean id="ehCacheManager"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+		p:configLocation="classpath:/cache/ehcache.xml"></bean>
+
+	<!-- 缓存相关开始 -->
+	<bean id="autoLoadConfig" class="com.jarvis.cache.to.AutoLoadConfig">
+		<property name="threadCnt" value="5" />
+		<property name="maxElement" value="10000" />
+		<property name="printSlowLog" value="true" />
+		<property name="slowLoadTime" value="500" />
+		<property name="sortType" value="1" />
+		<property name="checkFromCacheBeforeLoad" value="false" />
+		<property name="autoLoadPeriod" value="100" />
+	</bean>
+	<bean id="fastjsonSerializer" class="com.jarvis.cache.serializer.FastjsonSerializer" />
+	<bean id="jdkSerializer" class="com.jarvis.cache.serializer.JdkSerializer" />
+	<bean id="scriptParser" class="com.jarvis.cache.script.SpringELParser" />
+	
+	<bean id="sysCacheManager" class="com.gxhy.cache.ehcache.EhcacheCachePointCut"
+		destroy-method="destroy">
+		<constructor-arg ref="autoLoadConfig" />
+		<constructor-arg ref="jdkSerializer" />
+		<constructor-arg ref="scriptParser" />
+		<property name="cacheManager" ref="ehCacheManager" />
+		<property name="cacheName" value="sysCache"></property>
+		<property name="namespace" value="sysEhcacheCache" />
+	</bean>
+
+
+	<!-- for shiro -->
+	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">  
+	       <property name="cacheManager" ref="ehCacheManager" />   
+	</bean>		
+ 	 <bean id="sessionDAO" class="com.gxhy.cache.CommonSessionDAO">
+		<property name="cacheManager" ref="shiroCacheManager" />
+	</bean>
+</beans>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.sysmanager.persistence.ExcelMapper">
+
+   <!-- 增加河流信息 -->
+  <!--  <insert id="insertRiver">
+   INSERT INTO  ST_RIVER_B2(RV_CD,RV_NM,RVNM,RV_GRD,STBK,RV_LT,DRA_AREA,P_RV_CD,P_RV_NM,FTREG_AD,RV_OIGIN,RV_MTH,RVNM_CT,ADDVCD,CT)
+    VALUES(#{RV_CD},#{RV_NM},#{RVNM},#{RV_GRD},#{STBK},#{RV_LT},#{DRA_AREA},#{P_RV_CD},#{P_RV_NM},#{FTREG_AD},#{RV_OIGIN},#{RV_MTH},#{RVNM_CT},#{ADDVCD},null)
+   </insert> -->
+ 
+  <!--增加水库信息  -->
+<!--   <insert id="insertReservoir">
+   INSERT INTO ST_RSVR_B(RS_NM,RS_TP,ESSTYM,RECEMTM,AD_NM,AD_CD,CITY,COUNTRY,COUNTY,RVNM,ADMAUTH,RS_DEPT) 
+   VALUES(#{RS_NM},#{RS_TP},#{ESSTYM},#{RECEMTM},#{AD_NM},#{AD_CD},#{CITY},#{COUNTRY},#{COUNTY},#{RVNM},#{ADMAUTH},#{RS_DEPT})
+  </insert> -->
+ 
+ <!-- 增加防洪信息 --> 
+ <!-- <insert id="insertRsvrfcch">
+    INSERT INTO ST_RSVRFCCH_B(RAINHAV_AREA,FLDCP,CKFLZ,DSFLZ,W,FSLTDZ,XYFLDCP,DAMTP,MAXDAM,DAMLT,DAMALT,SPCRELE,DWLZ,CWLZ,PWLZ)
+     VALUES(#{RAINHAV_AREA},#{FLDCP},#{CKFLZ},#{DSFLZ},#{W},#{FSLTDZ},#{XYFLDCP},#{DAMTP},#{MAXDAM},#{DAMLT},#{DAMALT},#{SPCRELE},#{DWLZ},#{CWLZ},#{PWLZ})
+ </insert> -->
+ <insert id="saveAddvcd">
+    INSERT INTO ST_ADDVCD_D(ADDVCD,ADDVNM) VALUES (#{addvcd},#{addvnm})
+ </insert>
+</mapper>

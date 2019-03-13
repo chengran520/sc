@@ -1,0 +1,76 @@
+.qua_div{
+   	float: left;
+    border-bottom: 1px solid #dbdbdb;
+    border-right: 1px solid #dbdbdb;
+    border-top: 1px solid #dbdbdb;
+    padding: 39px 0 0 11px;
+    color: #6E6E6E;
+    width: 25.5%;
+    height: 44%;
+    margin: 11px 0px 0 0;
+    cursor: pointer;
+}
+.qua-span{
+    margin: -23px 0px 0 55px;
+    position: fixed;
+    font-size: 35px;
+    color: #12c7f9;
+}
+.ones{
+	margin: 11px 0 0 20px;
+	border-left: 1px solid #dbdbdb;
+}
+.nexts{
+	width: 17%;
+}
+.twos{
+	margin: -23px 0px 0 12px;
+	color: #5ed522;
+}
+.span-1{
+    margin: -23px 0px 0 6%;
+}
+.qua-left{
+	margin: -23px 0px 0 4%;
+	color: #ffc30c;
+}
+.span-2{
+	margin: -23px 0px 0 14.5%;
+}
+.chart-span{ 
+	border: 1px solid #00a9ec;
+    float: left;
+    margin: 6px 0 0 0px;
+    width: 53px;
+    padding: 0 0 0 5px;
+    text-align: center;
+    cursor: pointer;
+}
+.chart-1{
+	 margin: 6px 0 0 47px;
+	 border-top-left-radius:3px;
+	 border-bottom-left-radius:3px;
+}
+.chart-2{
+	 border-top-right-radius:3px;
+	 border-bottom-right-radius:3px;
+}
+.chart-border{
+	border-left: 0;
+}
+.active{
+	background-color: #00a9ec;
+	color: #fff;
+}
+.quaColor2{
+	color: #5ed522;
+}
+.quaColor3{
+	color: #23b562;
+}
+.quaColor4{
+	color: #ffc30c;
+}
+.quaColor5{
+	color: #ff5604;
+}

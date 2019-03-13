@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.hydro.persistence.PptnMapper">
+	<resultMap id="PptnModelMap" type="com.gxhy.hydro.webmodel.ResultPptnInfoModel">
+		<result column="STCD" jdbcType="VARCHAR" property="stcd" />
+		<result column="STNM" jdbcType="VARCHAR" property="stnm" />
+		<result column="STLC" jdbcType="VARCHAR" property="stlc" />
+		<result column="STTP" jdbcType="VARCHAR" property="sttp" />
+		<result column="RVNM" jdbcType="VARCHAR" property="rvnm" />
+		<result column="ADDVCD" jdbcType="VARCHAR" property="addvcd" />
+		<result column="ADDVNM" jdbcType="VARCHAR" property="addvnm" />
+		<result column="TM" jdbcType="TIMESTAMP" property="tm" />
+		<result column="DRP" jdbcType="DOUBLE" property="drp" />
+		<result column="DYP" jdbcType="DOUBLE" property="dyp" />
+		<result column="DAP" jdbcType="DOUBLE" property="dap" />
+	</resultMap>
+	
+	<!-- 根据测站ID获取相应的实时河道信息 -->
+    <select id="getPptnDataInfo"  resultMap="PptnModelMap">
+		SELECT TOP 1 P.STCD,P.TM,P.DRP,B.STNM,B.STTP,B.STLC FROM ST_PPTN_R P,ST_STBPRP_B B WHERE 1 = 1 AND P.STCD = B.STCD
+		<if test="stcd != null and stcd != '' ">
+			 AND P.STCD = #{stcd} 
+		</if>
+		ORDER BY P.TM DESC
+    </select>
+   
+	<select id="getRains" resultMap="PptnModelMap">
+		SELECT a.STCD,a.STNM,c.DRP,c.TM,a.RVNM,(select ADDVNM from ST_ADDVCD_D d where d.addvcd = a.addvcd ) as ADDVNM  FROM st_stbprp_b a left JOIN 
+		(SELECT r.drp, r.dyp, r.tm, r.stcd FROM ST_PPTN_R r, (SELECT stcd, MAX(tm) tm FROM ST_PPTN_R where 1 = 1
+		<if test="stm != null and stm != ''">
+	   		and tm >= #{stm}
+	 	</if>
+	 	<if test="etm != null and etm != ''">
+	   		and tm &lt;= #{etm}
+		</if>
+		   GROUP BY stcd) b 
+		WHERE r.stcd = b.stcd AND r.tm = b.tm) c on a.stcd=c.stcd  where a.STTP ='PP'  
+		<if test="keyword != null and keyword != ''">
+			and  (a.stcd like '%${keyword}%' or a.stnm like '%${keyword}%')
+     	</if>
+     	<if test="stm != null and stm != ''">
+	   		and c.tm >= #{stm}
+	 	</if>
+	 	<if test="etm != null and etm != ''">
+	   		and c.tm &lt;= #{etm}
+		</if>
+	 	<if test="adcd != null and adcd != ''">		 
+	    	and  a.addvcd  like '${adcd}%'
+	 	</if>
+		order by c.tm desc
+   </select>
+  
+   <!--根据测站编码差查询进一周的日雨量 -->
+   <select id="getDyp" resultMap="PptnModelMap">
+  		SELECT stcd,drp,isnull(dyp,0) AS dyp,tm FROM ST_PPTN_R WHERE 1 =1 
+  		<if test="stcd != null and stcd != ''">  		
+  		 	AND STCD=#{stcd}
+  		</if>
+  		<if test="stm!= null and stm != ''">
+	   		and tm >= #{stm}
+		 </if>
+		 <if test="etm != null and etm != ''">
+		   	and tm &lt;= #{etm}
+		</if>
+		order by TM 
+   </select>
+  
+  <select id="getRainData"    resultType="com.gxhy.hydro.webmodel.PptnResultModel">
+     SELECT R.STCD as stcd,B.STNM as stnm,R.TM as tm,R.drp as drp,
+     (select SUM(p.drp) from ST_PPTN_R p  where p.TM >= #{stm}  AND p.TM &lt;= #{etm} and p.STCD=r.stcd) as dyp 
+      FROM ST_PPTN_R R left join ST_STBPRP_B B on R.STCD = B.STCD where  R.TM >= #{stm} AND R.TM &lt;= #{etm}
+  </select>
+</mapper>

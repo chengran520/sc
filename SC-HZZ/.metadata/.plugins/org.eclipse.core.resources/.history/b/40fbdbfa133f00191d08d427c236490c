@@ -1,0 +1,915 @@
+package com.gxhy.routine.controller;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.CellRangeAddress;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.gxhy.base.controller.BaseController;
+import com.gxhy.base.domain.SysUsers;
+import com.gxhy.base.exp.JxlsUtils;
+import com.gxhy.base.model.Log;
+import com.gxhy.base.model.RequestModel;
+import com.gxhy.base.model.ResponseModel;
+import com.gxhy.base.security.util.SecurityUtil;
+import com.gxhy.base.util.AdcdUtil;
+import com.gxhy.base.util.CommonUtils;
+import com.gxhy.base.util.DateUtil;
+import com.gxhy.routine.domain.PatrolCatalogModel;
+import com.gxhy.routine.domain.ResultMapModel;
+import com.gxhy.routine.persistence.RoutineMapper;
+import com.gxhy.routine.service.RoutineService;
+import com.gxhy.routine.webmodel.CountResultModel;
+import com.gxhy.routine.webmodel.PatrolResultModel;
+import com.gxhy.routine.webmodel.QueryModel;
+import com.gxhy.routine.webmodel.ResultModel;
+
+/**
+ * 日常巡查
+ * @author yb
+ * @param <K>
+ * @2017年7月28日下午6:42:38   
+ * @CopyRight gxhy
+ */
+@RestController
+@RequestMapping("routine/work")
+@SuppressWarnings({"rawtypes","unchecked"})
+public class RoutineController<K> extends BaseController{
+	
+	@Autowired
+	RoutineService routineSerivce;
+
+	/**
+	 * 获取当前用户巡查信息
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/getMyRoutineWorks", method = RequestMethod.GET)
+	@Log(operationType = "巡河日志",operationName="我的日志")
+	public Object getPatrolCatalog(HttpServletRequest request,ResultMapModel model) throws Exception{
+		JSONObject map = new JSONObject();
+		SysUsers user = SecurityUtil.getSessionUser();
+		map = InitParams(model);
+		RequestInitRanges(map,true,ResultMapModel.class);
+		if(user != null){
+		   map.put("userId",user.getUserId());
+		   String patrolStartTm=request.getParameter("patrolEndTm");
+		   if(StringUtils.isNotBlank(patrolStartTm)){
+			   map.put("patrolStartTm", DateUtil.convertStringToDate(request.getParameter("patrolStartTm")));
+		   }
+		   String endTm=request.getParameter("patrolEndTm");
+		   if(StringUtils.isNotBlank(endTm)){
+			   map.put("patrolEndTm",DateUtil.getEndToTime(endTm));
+		   }
+		   map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getMyRoutineWorks");
+		   Page list = routineSerivce.selectList(map);
+		   return ResponseModel.Success(list);
+		}else{
+		   return ResponseModel.Success(null);  
+		}
+	}
+	
+	@RequestMapping(value = "/getPatrolUrl", method = RequestMethod.GET)
+	public Object getPatrolUrl(HttpServletRequest reques){
+		 String routineId  = reques.getParameter("routineId");
+		 JSONObject map = new JSONObject();
+		 map.put("routineId",routineId);
+		 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getRoutineUrl");
+		 PatrolCatalogModel model = (PatrolCatalogModel) routineSerivce.selectOne(map);
+		 if(model != null){
+			 File trajectFile = new File(model.getPatrolPath());
+			 if(!trajectFile.exists()){
+				 return ResponseModel.Failure("未找到对应轨迹！");
+			 }
+			 String encoding = "UTF-8";  
+			 Long filelength = trajectFile.length();  
+			 byte[] filecontent = new byte[filelength.intValue()];  
+			 try {  
+				 FileInputStream in = new FileInputStream(trajectFile);  
+				 in.read(filecontent);  
+				 in.close();  
+			 } catch (FileNotFoundException e) {  
+				 e.printStackTrace();  
+			 } catch (IOException e) {  
+				 e.printStackTrace();  
+			 }  
+			 try {  
+				 String path = new String(filecontent, encoding);  
+				 return ResponseModel.Success(path);
+			 } catch (UnsupportedEncodingException e) {  
+				 System.err.println("The OS does not support " + encoding);  
+				 e.printStackTrace();  
+				 return null;  
+			 }  
+		 }
+		 return ResponseModel.Failure("未找到对应轨迹！");
+	}
+	
+	/**
+	 * 获取当前用户的下级巡河信息
+	 * @return
+	 * @throws Exception 
+	 */	
+	@RequestMapping(value = "/getSubRoutineWorks", method = RequestMethod.GET)
+	@Log(operationType = "日常巡查",operationName="下级巡检日志")
+	public Object getSubRoutineWorks(HttpServletRequest request,ResultMapModel model) throws Exception{
+		JSONObject map = new JSONObject();
+		map = InitParams(model);
+		RequestInitRanges(map,true,ResultMapModel.class);
+		SysUsers user = SecurityUtil.getSessionUser();
+		String addvcd = user.getUserAddvcd();
+		String prefixAdcd = AdcdUtil.getPrefixAdcd(addvcd, false);
+		map.put("adcd", prefixAdcd);
+		map.put("patrolStartTm", DateUtil.convertStringToDate(request.getParameter("patrolStartTm")));
+	  	map.put("patrolEndTm",DateUtil.getEndToTime(request.getParameter("patrolEndTm")));
+	  	map.put("patrolUser", request.getParameter("patrolUser"));
+	  	int job=Integer.parseInt(user.getUserJob());
+	  	int deptId=Integer.parseInt(user.getDeptId());
+		 if(job<=7||job==14||user.getUserId().equals("cmc")){//县级可以查询所有的巡河记录
+			 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getSubRoutineWorksAll");
+		 }else if(job==8||job==13||(deptId>=33&&deptId<=43)){//乡级查看所在行政区的所有人的巡河记录（村河长，乡河长，乡镇管理所，巡查员，保洁员）
+				int[] arr={8,9,10,11,13};
+				int[] depts={33,34,35,36,37,38,39,40,41,43};
+				map.put("arr", arr);
+				map.put("depts", depts);
+			map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getSubRoutineWorks");
+		 }else{//村河长或者巡河员或者保洁员查询自己的巡河记录
+			 map.put("userId",user.getUserId());
+			 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getMyRoutineWorks");
+		 }  
+	  	List<PatrolCatalogModel> list  = routineSerivce.selectList(map);
+	  	return ResponseModel.Success(list);
+	}
+	
+	/**
+	 * 保洁巡河信息
+	 * @return
+	 * @throws Exception 
+	 */	
+	@RequestMapping(value = "/getCleanRoutineWorks", method = RequestMethod.GET)
+	@Log(operationType = "日常巡查",operationName="保洁巡河")
+	public Object getCleanRoutineWorks(HttpServletRequest request,ResultMapModel model) throws Exception{
+		   JSONObject map = new JSONObject();
+		   map = InitParams(model);
+		   RequestInitRanges(map,true,ResultMapModel.class);
+		   String patrolStartTm=request.getParameter("patrolEndTm");
+		   if(StringUtils.isNotBlank(patrolStartTm)){
+			   map.put("patrolStartTm", DateUtil.convertStringToDate(request.getParameter("patrolStartTm")));
+		   }
+		   String endTm=request.getParameter("patrolEndTm");
+		   if(StringUtils.isNotBlank(endTm)){
+			   map.put("patrolEndTm",DateUtil.getEndToTime(endTm));
+		   }
+		   map.put("job", 10);
+		   map.put("patrolUser", request.getParameter("patrolUser"));
+		   map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getCleanRoutineWorks");
+		   List<PatrolCatalogModel> list  = routineSerivce.selectList(map);
+		   return ResponseModel.Success(list);
+	}
+	
+	/**
+	 * 导出巡河记录
+	 * excel表
+	 * @param model
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	 @RequestMapping(value = "/exportRoutineWork", method = RequestMethod.POST)
+	 	public void  exportRoutineWork(QueryModel model,HttpServletRequest request,HttpServletResponse response) throws Exception {
+	    	Map<String, List<PatrolCatalogModel>> maps = new HashMap<String, List<PatrolCatalogModel>>();
+	 		JSONObject map = new JSONObject();
+	 		SysUsers user = SecurityUtil.getSessionUser();
+	 		map = InitParams(model);
+	 		String stm=request.getParameter("stm");
+	 		if(StringUtils.isNotBlank(stm)){
+	 			map.put("stm", DateUtil.convertStringToDate(stm));
+	 		}
+	 		String etm=request.getParameter("etm");
+	 		if(StringUtils.isNotBlank(stm)){
+	 			map.put("etm", DateUtil.convertStringToDate(etm));
+	 		}
+		    map.put("userId", user.getUserId()); 
+		    map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getRoutineWorks");
+		    export(request, response, maps, map, user.getUserName(),"routineInfo");
+	 		
+	  }
+     
+     /**
+      * 下级巡河
+      * @param model
+      * @param request
+      * @param response
+      * @throws Exception
+      */
+     @RequestMapping(value = "/exportSubRoutine", method = RequestMethod.POST)
+     public void  exportSubRoutine(QueryModel model,HttpServletRequest request,HttpServletResponse response) throws Exception {
+    	 Map<String, List<PatrolCatalogModel>> maps = new HashMap<String, List<PatrolCatalogModel>>();
+    	 JSONObject map = new JSONObject();
+    	 SysUsers user = SecurityUtil.getSessionUser();
+    	 map = InitParams(model);
+    	 String stm=request.getParameter("stm");
+    	 map.put("adcd", AdcdUtil.getPrefixAdcd(user.getUserAddvcd(), true));
+    		map.put("patrolUser", request.getParameter("patrolUser"));
+    	 if(StringUtils.isNotBlank(stm)){
+    		 map.put("patrolStartTm", DateUtil.convertStringToDate(stm));
+    	 }
+    	 String etm=request.getParameter("etm");
+    	 if(StringUtils.isNotBlank(stm)){
+    		 map.put("patrolEndTm",DateUtil.getEndToTime(etm));
+    	 }
+    	 int job=Integer.parseInt(user.getUserJob());
+ 		 if(job<=7||job==14||user.getUserId().equals("cmc")){//县级可以查询所有的巡河记录
+ 			 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getSubRoutineWorksAll");
+ 		 }else if(job==8||job==13){//乡级查看所在行政区的所有人的巡河记录
+ 			int[] arr={8,9,10,11,13};
+ 			map.put("arr", arr);
+ 			map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getSubRoutineWorks");
+ 		 }else{//村河长或者巡河员或者保洁员查询自己的巡河记录
+			 map.put("userId",user.getUserId());
+			 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".getMyRoutineWorks");
+		 }   	 
+    	 export(request, response, maps, map, user.getUserName()+"下级","userRoutineInfo");
+    	 
+     }
+     
+     /**
+      * 按角色导出excel的数据
+      * @param model
+      * @param request
+      * @param response
+      * @throws Exception
+      */
+     @RequestMapping(value = "/exportTj", method = RequestMethod.POST)
+     public void  exportTj(QueryModel model,HttpServletRequest request,HttpServletResponse response) throws Exception {
+    	 Map<String, List<PatrolResultModel>> maps = new HashMap<String, List<PatrolResultModel>>();
+    	 JSONObject map = new JSONObject();
+    	 String stm=request.getParameter("stm");
+    	 map.put("patrolUser", request.getParameter("patrolUser"));
+    	 if(StringUtils.isNotBlank(stm)){
+    		 map.put("patrolStartTm", DateUtil.convertStringToDate(stm));
+    	 }
+    	 String etm=request.getParameter("etm");
+    	 if(StringUtils.isNotBlank(stm)){
+    		 map.put("patrolEndTm",DateUtil.getEndToTime(etm));
+    	 }
+    	 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".exportTj");
+    	 List<PatrolResultModel> list=routineSerivce.selectLists(map);   	 
+    	 List<PatrolResultModel> list1=new ArrayList<PatrolResultModel>();//乡镇河长
+    	 List<PatrolResultModel> list2=new ArrayList<PatrolResultModel>();//村级河长
+    	 List<PatrolResultModel> list3=new ArrayList<PatrolResultModel>();//巡河员
+    	 List<PatrolResultModel> list4=new ArrayList<PatrolResultModel>();//保洁员
+    	 List<PatrolResultModel> list5=new ArrayList<PatrolResultModel>();//其他人员
+    	 //装配人员
+    	 int num=0;
+    	 for(PatrolResultModel m:list){
+    		 if(m.getRoleId().equals("country")){
+    			 list1.add(m);
+    		 }else if(m.getRoleId().equals("village")){
+    			 list2.add(m); 
+    		 }else if(m.getRoleId().equals("xhy")){
+    			 list3.add(m); 
+    		 }else if(m.getRoleId().equals("bjy")){
+    			 list4.add(m); 
+    		 }else{
+    			 list5.add(m);
+    		 }
+    	 }
+    	 HSSFWorkbook workBook = new HSSFWorkbook();
+    	 HSSFSheet sheet = workBook.createSheet("河长、巡查员巡河情况统计表"); 
+    	 //设置样式
+    	 HSSFCellStyle cellStyle=setCellStyle(workBook);
+         //设置列宽自适应
+    	 sheet.autoSizeColumn(1, true);
+         HSSFRow row = sheet.createRow((short) 0);
+         // 在索引0的位置创建单元格（左上端）
+         HSSFCell cell = row.createCell(0);  
+         // 定义单元格为字符串类型
+         cell.setCellStyle(cellStyle);  
+         // 在单元格中输入一些内容
+         cell.setCellValue(new HSSFRichTextString("河长、巡查员巡河情况统计表"+(stm+"至"+etm)));  
+    	 cell.setCellStyle(cellStyle);
+        //首行跨列
+         CellRangeAddress region1 = new CellRangeAddress(0, 0, (short) 0, (short) 9); 
+         sheet.addMergedRegion(region1);
+         HSSFRow row2 = sheet.createRow((short) 1);
+         String[] titles={"乡（镇）级河长","巡河次数","村级河长","巡河次数","巡查员","巡河次数","保洁员","巡河次数","其他人员","巡河次数"};
+         HSSFCell cell1 = null;
+    	 for (int i = 0; i < titles.length; i++) {
+    		 cell1 = row2.createCell(i);
+    		 cell1.setCellValue(titles[i]);
+    		 cell1.setCellStyle(cellStyle);
+    	 }
+      //获取数组中最大的值判断需要创建多少行 
+	    Integer[] numbers = {list1.size(),list2.size(),list3.size(),list4.size(),list5.size()};
+        int max = (int) Collections.max(Arrays.asList(numbers));
+        //创建行和列
+    	for(int i=0;i<max;i++){
+    		HSSFRow dataRow= sheet.createRow(i + 2);
+    		 HSSFCell data[] = new HSSFCell[10];
+	    	 for (int j = 0; j < 10; j++) {
+	    	    data[j] = dataRow.createCell(j);
+	    	    data[j].setCellStyle(cellStyle);
+    	     }
+    	} 
+    	 if (list1 != null && list1.size() > 0) {
+	    	 // 循环list中的数据
+	    	 for (int i = 0; i < list1.size(); i++) {
+		    	 PatrolResultModel p = (PatrolResultModel) list1.get(i);
+		    	 HSSFRow dataRow= sheet.getRow(i+2);
+		    	 HSSFCell c= dataRow.getCell(0);
+		    	 c.setCellValue(p.getUserNm());
+		    	 HSSFCell c2= dataRow.getCell(1);
+		    	 c2.setCellValue(p.getCount());    
+		    	 HSSFCell c3= dataRow.getCell(2);
+		    	 c3.setCellValue(p.getAddvnm());    	
+	    	 }    	 
+         } 
+    	 if (list2 != null && list2.size() > 0) {
+	    	 // 循环list中的数据
+	    	 for (int i = 0; i < list2.size(); i++) {
+		    	 PatrolResultModel p = (PatrolResultModel) list2.get(i);
+		    	 HSSFRow dataRow= sheet.getRow(i+2);
+		    	 HSSFCell c= dataRow.getCell(3);
+		    	 c.setCellValue(p.getUserNm());
+		    	 HSSFCell c2= dataRow.getCell(4);
+		    	 c2.setCellValue(p.getCount());	 
+		    	 HSSFCell c3= dataRow.getCell(5);
+		    	 c3.setCellValue(p.getAddvnm());   
+	    	 }    	 
+         } 
+    	 if (list3 != null && list3.size() > 0) {
+	    	 // 循环list中的数据
+	    	 for (int i = 0; i < list3.size(); i++) {
+		    	 PatrolResultModel p = (PatrolResultModel) list3.get(i);
+		    	 HSSFRow dataRow= sheet.getRow(i+2);
+		    	 HSSFCell c= dataRow.getCell(6);
+		    	 c.setCellValue(p.getUserNm());
+		    	 HSSFCell c2= dataRow.getCell(7);
+		    	 c2.setCellValue(p.getCount());	   
+		    	 HSSFCell c3= dataRow.getCell(8);
+		    	 c3.setCellValue(p.getAddvnm()); 
+	    	 }    	 
+         } 
+    	 if (list4 != null && list4.size() > 0) {
+	    	 // 循环list中的数据
+	    	 for (int i = 0; i < list4.size(); i++) {
+		    	 PatrolResultModel p = (PatrolResultModel) list4.get(i);
+		    	 HSSFRow dataRow= sheet.getRow(i+2);	
+		    	 int coloumNum=dataRow.getPhysicalNumberOfCells();
+		    	 HSSFCell c= dataRow.getCell(9);
+		    	 c.setCellValue(p.getUserNm());
+		    	 HSSFCell c2= dataRow.getCell(10);
+		    	 c2.setCellValue(p.getCount());	
+		    	 HSSFCell c3= dataRow.getCell(11);
+		    	 c3.setCellValue(p.getAddvnm());
+	    	 }    	 
+         } 
+    	 if (list5 != null && list5.size() > 0) {
+	    	 // 循环list中的数据
+	    	 for (int i = 0; i < list5.size(); i++) {
+		    	 PatrolResultModel p = (PatrolResultModel) list5.get(i);
+		    	 HSSFRow dataRow= sheet.getRow(i+2);	
+		    	 HSSFCell c= dataRow.getCell(11);
+		    	 c.setCellValue(p.getUserNm());
+		    	 HSSFCell c2= dataRow.getCell(12);
+		    	 c2.setCellValue(p.getCount());
+		    	 HSSFCell c3= dataRow.getCell(13);
+		    	 c3.setCellValue(p.getAddvnm());
+	    	 }    	 
+         } 
+    	 JxlsUtils.downloadFile(response, request, "河长、巡查员巡河情况统计表", workBook);
+     }
+     
+
+     /**
+      * 按月份巡河
+      * @param model
+      * @param request
+      * @param response
+      * @throws Exception
+      */
+    @RequestMapping(value = "/exportTj2", method = RequestMethod.POST)
+    public void  exportTj2(QueryModel model,HttpServletRequest request,HttpServletResponse response) throws Exception {
+    	 Map<String, List<PatrolResultModel>> maps = new HashMap<String, List<PatrolResultModel>>();
+    	 JSONObject map = new JSONObject();
+    	 String stm=request.getParameter("stm");
+    	 //相差的月份
+    	 int count=Integer.parseInt(request.getParameter("count"));
+    	 map.put("count", count);
+    	 map.put("patrolUser", request.getParameter("patrolUser"));
+    	 if(StringUtils.isNotBlank(stm)){
+    		 map.put("patrolStartTm", DateUtil.convertStringToDate(stm));
+    	 }
+    	 String etm=request.getParameter("etm");
+    	 if(StringUtils.isNotBlank(stm)){
+    		 map.put("patrolEndTm",DateUtil.getEndToTime(etm));
+    	 }
+    	
+    	 HSSFWorkbook workBook = new HSSFWorkbook();
+         //第一行表头字段，合并单元格时字段跨几列就将该字段重复几次
+    	 String[] excelHeader0=null;//第一行的表头
+    	 String[] headnum0=null; 
+    	 String[] header0=null;
+    	 String[]  header0Num=null;
+    	 String[]  rowHeader0=null;
+    	 String[]  rowHeaderNum0=null;
+    	 List<String> smonths=DateUtil.getMonthBetween(stm,etm);
+    	 List<String> months=new ArrayList<String>();
+    	 for(int i=0;i<smonths.size();i++){
+    		 months.add(smonths.get(i).substring(0,smonths.get(i).length()-1));
+    	 }
+    	 map.put("months", months);
+         // 合并单元格   	 
+    	 switch (count) {
+			case 1:
+				 String[] excelHeader1 = { "乡镇名称", "乡镇河长人数", "乡（镇）级河长巡河次数","乡（镇）级河长巡河次数", "村级河长人数","村级河长巡河次数", "村级河长巡河次数", "巡查员人数", "巡查员巡河次数","巡查员巡河次数"};
+				 String[] headnum1 = { "0,2,0,0", "0,2,1,1", "0,0,2,3", "0,2,4,4", "0,0,5,6", "0,2,7,7", "0,0,8,9" };
+				 String[] header1={"应巡河次数","实际巡河次数","","应巡河次数","实际巡河次数","","应巡河次数","实际巡河次数"};
+				 String[] header1Num = { "1,2,2,2", "1,1,3,3", "1,2,5,5", "1,1,6,6", "1,2,8,8", "1,1,9,9" };
+		    	 String[]  rowHeader1={"","","",""+smonths.get(0)+"","","",""+smonths.get(0)+"",""+smonths.get(0)+""};
+		    	 String[] rowHeaderNum1={"2,2,3,3","2,2,6,6","2,2,9,9"};
+				 excelHeader0=excelHeader1;
+				 headnum0=headnum1;
+				 header0=header1;
+				 header0Num=header1Num;
+				 rowHeader0=rowHeader1;
+				 rowHeaderNum0=rowHeaderNum1;
+			break;
+			case 2:
+				 String[] excelHeader2= { "乡镇名称", "乡镇河长人数", "乡（镇）级河长巡河次数","乡（镇）级河长巡河次数","乡（镇）级河长巡河次数", "村级河长人数","村级河长巡河次数", "村级河长巡河次数","村级河长巡河次数", "巡查员人数", "巡查员巡河次数","巡查员巡河次数","巡查员巡河次数"};
+				 String[] headnum2 = { "0,2,0,0", "0,2,1,1", "0,0,2,4", "0,2,5,5", "0,0,6,8", "0,2,9,9", "0,0,10,12"};
+				 String[] header2={"应巡河次数","实际巡河次数","实际巡河次数","","应巡河次数","实际巡河次数","实际巡河次数","","应巡河次数","实际巡河次数","实际巡河次数"};
+				 String[] header2Num = { "1,2,2,2", "1,1,3,4", "1,2,6,6", "1,1,7,8", "1,2,10,10", "1,1,11,12" };
+				 String[]  rowHeader2={"","","",""+smonths.get(0)+"",""+smonths.get(1)+"","","",""+smonths.get(0)+"",""+smonths.get(1)+"",""+smonths.get(0)+"",""+smonths.get(1)+""};
+		    	 String[] rowHeaderNum2={"2,2,3,3","2,2,4,4","2,2,7,7","2,2,8,8","2,2,11,11","2,2,12,12"};
+				 excelHeader0=excelHeader2;
+			     headnum0=headnum2;
+			     header0=header2;
+			     header0Num=header2Num;
+			     rowHeader0=rowHeader2;
+				 rowHeaderNum0=rowHeaderNum2;
+			break;
+			case 3:
+				 String[] excelHeader3= { "乡镇名称", "乡镇河长人数", "乡（镇）级河长巡河次数","乡（镇）级河长巡河次数","乡（镇）级河长巡河次数","乡（镇）级河长巡河次数", "村级河长人数","村级河长巡河次数", "村级河长巡河次数","村级河长巡河次数","村级河长巡河次数", "巡查员人数", "巡查员巡河次数","巡查员巡河次数","巡查员巡河次数","巡查员巡河次数"};
+				 String[] headnum3 = { "0,2,0,0", "0,2,1,1", "0,0,2,5", "0,2,6,6", "0,0,7,10", "0,2,11,11", "0,0,12,15"};
+				 String[] header3={"应巡河次数","实际巡河次数","实际巡河次数","实际巡河次数","","应巡河次数","实际巡河次数","实际巡河次数","实际巡河次数","","应巡河次数","实际巡河次数","实际巡河次数","实际巡河次数"};
+				 String[] header3Num = { "1,2,2,2", "1,1,3,5", "1,2,7,7", "1,1,8,10", "1,2,12,12", "1,1,13,15" };
+				 String[]  rowHeader3={"","","",""+smonths.get(0)+"",""+smonths.get(1)+"",""+smonths.get(2)+"","","",""+smonths.get(0)+"",""+smonths.get(1)+"",""+smonths.get(2)+"",""+smonths.get(0)+"",""+smonths.get(1)+"",""+smonths.get(2)+""};
+		    	 String[] rowHeaderNum3={"2,2,3,3","2,2,4,4","2,2,5,5","2,2,8,8","2,2,9,9","2,2,10,10","2,2,13,13","2,2,14,14","2,2,15,15"};
+				 excelHeader0=excelHeader3;
+			     headnum0=headnum3;
+			     header0=header3;
+			     header0Num=header3Num;
+			     rowHeader0=rowHeader3;
+				 rowHeaderNum0=rowHeaderNum3;
+			break;
+		}   
+         // 生成一个表格
+         HSSFSheet sheet = workBook.createSheet("TAQIDataReport");
+
+         // 生成一种样式
+         HSSFCellStyle style = workBook.createCellStyle();
+         // 设置样式
+         style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+         style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+         style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+         style.setBorderRight(HSSFCellStyle.BORDER_THIN);
+         style.setBorderTop(HSSFCellStyle.BORDER_THIN);
+         style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+         style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+
+         // 生成一种字体
+         HSSFFont font = workBook.createFont();
+         // 设置字体
+         font.setFontName("微软雅黑");
+         // 设置字体大小
+         font.setFontHeightInPoints((short) 12);
+         // 字体加粗
+         font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+         // 在样式中引用这种字体
+         style.setFont(font);
+
+         // 生成并设置另一个样式
+         HSSFCellStyle style2 = workBook.createCellStyle();
+         style2.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
+         style2.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+         style2.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+         style2.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+         style2.setBorderRight(HSSFCellStyle.BORDER_THIN);
+         style2.setBorderTop(HSSFCellStyle.BORDER_THIN);
+         style2.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+         style2.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+         // 生成另一种字体2
+         HSSFFont font2 = workBook.createFont();
+         // 设置字体
+         font2.setFontName("微软雅黑");
+         // 设置字体大小
+         font2.setFontHeightInPoints((short) 12);
+         // 在样式2中引用这种字体
+         style2.setFont(font2);
+         // 生成表格的第一行
+         // 第一行表头
+         HSSFRow row = sheet.createRow(0);
+         for (int i = 0; i < excelHeader0.length; i++) {
+             sheet.autoSizeColumn(i, true);// 根据字段长度自动调整列的宽度
+             HSSFCell cell = row.createCell(i);
+             cell.setCellValue(excelHeader0[i]);
+             cell.setCellStyle(style);
+             if (i >= 0 && i <= 18) {
+                 for (int j = 0; j < excelHeader0.length; j++) {
+                     // 从第j列开始填充
+                     cell = row.createCell(j);
+                     // 填充excelHeader1[j]第j个元素
+                     cell.setCellValue(excelHeader0[j]);
+                     cell.setCellStyle(style);
+                 }
+             }
+         }
+         // 动态合并单元格
+         for (int i = 0; i < headnum0.length; i++) {
+             sheet.autoSizeColumn(i, true);
+             String[] temp = headnum0[i].split(",");
+             Integer startrow = Integer.parseInt(temp[0]);
+             Integer overrow = Integer.parseInt(temp[1]);
+             Integer startcol = Integer.parseInt(temp[2]);
+             Integer overcol = Integer.parseInt(temp[3]);
+             sheet.addMergedRegion(new CellRangeAddress(startrow, overrow, startcol, overcol));
+         }
+
+         // 第二行表头
+        row = sheet.createRow(1);
+         for (int i = 0; i < header0.length; i++) {
+             sheet.autoSizeColumn(i, true);// 自动调整宽度
+             HSSFCell cell = row.createCell(i + 1);
+             cell.setCellValue(header0[i]);
+             cell.setCellStyle(style);
+             if (i >= 2 && i <= 30) {
+                 for (int j = 0; j < header0.length; j++) {
+                     // 从第j+1列开始填充
+                     cell = row.createCell(j + 2);
+                     // 填充excelHeader1[j]第j个元素
+                     cell.setCellValue(header0[j]);
+                     cell.setCellStyle(style);
+                 }
+             }
+         }
+         // 动态合并单元格
+         for (int i = 0; i < header0Num.length; i++) {
+             sheet.autoSizeColumn(i, true);
+             String[] temp = header0Num[i].split(",");
+             Integer startrow = Integer.parseInt(temp[0]);
+             Integer overrow = Integer.parseInt(temp[1]);
+             Integer startcol = Integer.parseInt(temp[2]);
+             Integer overcol = Integer.parseInt(temp[3]);
+             sheet.addMergedRegion(new CellRangeAddress(startrow, overrow, startcol, overcol));
+         }
+         // 第三行表头
+         row = sheet.createRow(2);
+         for (int i = 0; i < rowHeader0.length; i++) {
+             HSSFCell cell = row.createCell(i + 2);
+             cell.setCellValue(rowHeader0[i]);
+             cell.setCellStyle(style);
+             sheet.autoSizeColumn(i, true);// 自动调整宽度
+             if (i > 1 && i <= 15) {
+                 for (int j = 0; j < rowHeader0.length-3; j++) {
+                     // 从第j+2列开始填充
+                     cell = row.createCell(j);
+                     // 填充excelHeader1[j]第j个元素
+                     cell.setCellValue(rowHeader0[j]);
+                     cell.setCellStyle(style);
+                 }
+             }
+         }
+         // 动态合并单元格
+         for (int i = 0; i < rowHeaderNum0.length; i++) {
+             sheet.autoSizeColumn(i, true);
+             String[] temp = rowHeaderNum0[i].split(",");
+             Integer startrow = Integer.parseInt(temp[0]);
+             Integer overrow = Integer.parseInt(temp[1]);
+             Integer startcol = Integer.parseInt(temp[2]);
+             Integer overcol = Integer.parseInt(temp[3]);
+             sheet.addMergedRegion(new CellRangeAddress(startrow, overrow, startcol, overcol));
+         }  
+         
+         map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".exportTj2");
+    	 List<CountResultModel> models=routineSerivce.selectLists(map);
+    	     	 
+    	 //实际巡河次数的统计
+    	 map.put(RequestModel.SQLID, RoutineMapper.class.getName() + ".exportTj3");
+    	 List<ResultModel> mods=routineSerivce.selectLists(map);
+    	 
+    	 
+    	 double zhi=(double) (30*count/7);
+    	//相差的星期倍数
+		 int ye = (int) Math.ceil(zhi);
+		 //相差的天数
+		 int days = (int) ((DateUtil.convertStringToDate(etm).getTime() - DateUtil.convertStringToDate(stm).getTime()) / (1000*3600*24));
+    	 /*int m1 = Integer.parseInt(stm.substring(5, 7));
+    	 int m3 = Integer.parseInt(etm.substring(5, 7));
+    	 int m2 = m3 - m1 ;
+    	 for (CountResultModel c1 : models) {
+        	 for (CountResultModel c2 : mods) {
+     			if(c2.getAddvnm().equals(c1.getAddvnm())){
+     				if(c2.getRoleId().equals(c1.getRoleId())){
+     					c1.setA1(3*count);
+     					
+     				}
+     			}
+     		}
+		 }
+    	 */
+    	 
+     	//创建行和列
+    	for(int i=0;i<100;i++){
+    		HSSFRow dataRow= sheet.createRow(i + 3);
+    		 HSSFCell data[] = new HSSFCell[16];
+	    	 for (int j = 0; j < 16; j++) {
+	    	    data[j] = dataRow.createCell(j);
+	    	    data[j].setCellStyle(style);
+    	     }
+    	} 
+     	    	
+    	 if (models != null && models.size() > 0) {
+	    	 // 循环list中的数据
+	    	 for (int i = 0; i <33; i=i+3) {
+	    		 CountResultModel p = (CountResultModel) models.get(i);
+	    		 HSSFRow dataRow=null;
+	    		 if(i==0){
+	    			dataRow= sheet.getRow(i+3);
+	    		 }else{
+	    			 dataRow= sheet.getRow(i/3+3);
+	    		 }	    		 
+		    	 HSSFCell c= dataRow.getCell(0);
+		    	 c.setCellValue(p.getAddvnm());//行政区
+		    	 
+		    	 HSSFCell c2= dataRow.getCell(1);
+		    	 if(p.getRoleId().equals("country")){
+	    			 c2.setCellValue(p.getCount());//乡镇河长人数
+	    		 }	
+		    	 HSSFCell cc= dataRow.getCell(2);//乡级应巡河次数
+		    	 cc.setCellValue(3*count);
+		    	 
+	    		 CountResultModel p2 = (CountResultModel) models.get(i+1);
+	    		 CountResultModel p3 = (CountResultModel) models.get(i+2);
+	    		
+	    		 if(count==1){
+	    			 HSSFCell c3= dataRow.getCell(4);
+		    		 c3.setCellValue(p2.getCount());
+		    		 HSSFCell c4= dataRow.getCell(7);
+		    		 c4.setCellValue(p3.getCount());
+		    		 //村级应巡河次数
+		    		 HSSFCell cc1= dataRow.getCell(5);
+		    		 cc1.setCellValue(ye);
+		    		//巡查员应巡河次数 
+		    		 HSSFCell cc2= dataRow.getCell(8);
+		    		 cc2.setCellValue(days);
+	    		 }else if(count==2){
+	    			 HSSFCell c3= dataRow.getCell(5);
+		    		 c3.setCellValue(p2.getCount());
+		    		 HSSFCell c5= dataRow.getCell(9);
+		    		 c5.setCellValue(p3.getCount());
+		    		 //村级应巡河次数
+		    		 HSSFCell cc1= dataRow.getCell(6);
+		    		 cc1.setCellValue(ye);
+		    		//巡查员应巡河次数 
+		    		 HSSFCell cc2= dataRow.getCell(10);
+		    		 cc2.setCellValue(days);
+	    		 }else if(count==3){
+	    			 HSSFCell c3= dataRow.getCell(6);
+		    		 c3.setCellValue(p2.getCount());
+		    		 
+		    		 HSSFCell c5= dataRow.getCell(11);
+		    		 c5.setCellValue(p3.getCount());
+		    		 
+		    		 //村级应巡河次数
+		    		 HSSFCell cc1= dataRow.getCell(7);
+		    		 cc1.setCellValue(ye);
+		    		//巡查员应巡河次数 
+		    		 HSSFCell cc3= dataRow.getCell(12);
+		    		 cc3.setCellValue(days);
+	    		 }
+	    	    	 
+		   }
+    	 } 
+   
+    	  if (mods != null && mods.size()> 0) {
+    		 // 循环list中的数据
+    		 if(count==1){
+    			 for (int i = 0; i <mods.size(); i++) {
+    				 ResultModel p = (ResultModel) mods.get(i);
+    				 /*ResultModel p2 = (ResultModel) mods.get(i+1);
+    				 ResultModel p3 = (ResultModel) mods.get(i+2);*/
+    	    		 HSSFRow dataRow= null;
+    	    		 if(i==0){
+    	    			 dataRow=sheet.getRow(i+3);
+    	    		 }else{
+    	    			 dataRow= sheet.getRow(i%3+3);
+    	    		 }
+    	    		 HSSFCell c= dataRow.getCell(3); 
+    	    		 if((p.getRoleId().equals("country"))&&(p.getAddvnm().equals(dataRow.getCell(0).toString()))){
+    	    			 c.setCellValue(p.getCount());
+    	    		 }
+    	    		   	    		
+    	    		 if((p.getRoleId().equals("village"))&&(p.getAddvnm().equals(dataRow.getCell(0).toString()))){
+    	    			 HSSFCell c1= dataRow.getCell(6); 
+    	    			 c1.setCellValue(p.getCount());
+    	    		 }   		    	
+    		    	 		    	 
+    		    	 if((p.getRoleId().equals("xhy"))&&(p.getAddvnm().equals(dataRow.getCell(0).toString()))){
+    		    		 HSSFCell c2= dataRow.getCell(9);  
+    		    		 c2.setCellValue(p.getCount()); 
+    		    	 }
+    		    	  
+    	    	}   	
+    		 }else if(count==2){
+    			 for (int i = 0; i <33; i=i+6) {
+    				 ResultModel p = (ResultModel) mods.get(i);
+    	    		 HSSFRow dataRow=null;
+    	    		 if(i==0){
+    	    			dataRow= sheet.getRow(i+3);
+    	    		 }else{
+    	    			 dataRow= sheet.getRow(i/3+3);
+    	    		 }
+    	    		 if(p.getAddvnm().equals(dataRow.getCell(0))){
+    	    			 HSSFCell c= dataRow.getCell(3);
+        		    	 c.setCellValue(p.getCount());
+        		    	 ResultModel p2 = (ResultModel) mods.get(i+1);
+        		    	 HSSFCell c1= dataRow.getCell(4);
+        		    	 c1.setCellValue(p2.getCount());
+        		    	 ResultModel p3 = (ResultModel) mods.get(i+2);
+        		    	 HSSFCell c2= dataRow.getCell(7);
+        		    	 c2.setCellValue(p3.getCount());
+        		    	 ResultModel p4 = (ResultModel) mods.get(i+3);
+        		    	 HSSFCell c3= dataRow.getCell(8);
+        		    	 c3.setCellValue(p4.getCount());
+        		    	 ResultModel p5 = (ResultModel) mods.get(i+4);
+        		    	 HSSFCell c4= dataRow.getCell(11);
+        		    	 c4.setCellValue(p5.getCount());
+        		    	 ResultModel p6 = (ResultModel) mods.get(i+5);
+        		    	 HSSFCell c5= dataRow.getCell(12);
+        		    	 c5.setCellValue(p6.getCount());
+    	    		 }else{
+    	    			 dataRow= sheet.getRow(i/3+3+1);
+    	    		 }
+    		    	
+    		    	 
+    	    	 }
+    		 }else if(count==3){
+    			 for (int i = 0; i <33; i=i+9) {
+    				 ResultModel p = (ResultModel) mods.get(i);
+    	    		 HSSFRow dataRow=null;
+    	    		 if(i==0){
+    	    			dataRow= sheet.getRow(i+3);
+    	    		 }else{
+    	    			 dataRow= sheet.getRow(i/3+3);
+    	    		 }
+    		    	 HSSFCell c= dataRow.getCell(3);
+    		    	 c.setCellValue(p.getCount());
+    		    	 ResultModel p2 = (ResultModel) mods.get(i+1);
+    		    	 HSSFCell c1= dataRow.getCell(4);
+    		    	 c1.setCellValue(p2.getCount());
+    		    	 
+    		    	 ResultModel p3 = (ResultModel) mods.get(i+2);
+    		    	 HSSFCell c3= dataRow.getCell(5);
+    		    	 c3.setCellValue(p3.getCount());
+    		    	 
+    		    	 ResultModel p4 = (ResultModel) mods.get(i+3);
+    		    	 HSSFCell c4= dataRow.getCell(8);
+    		    	 c4.setCellValue(p4.getCount());
+    		    	 
+    		    	 ResultModel p5 = (ResultModel) mods.get(i+4);
+    		    	 HSSFCell c5= dataRow.getCell(9);
+    		    	 c5.setCellValue(p5.getCount());
+    		    	 
+    		    	 ResultModel p6= (ResultModel) mods.get(i+5);
+    		    	 HSSFCell c6= dataRow.getCell(10);
+    		    	 c6.setCellValue(p6.getCount());
+    		    	     		    	 
+    		    	 ResultModel p7= (ResultModel) mods.get(i+6);
+    		    	 HSSFCell c7= dataRow.getCell(11);
+    		    	 c7.setCellValue(p7.getCount());
+    		    	     		    	 
+    		    	 ResultModel p8= (ResultModel) mods.get(i+7);
+    		    	 HSSFCell c8= dataRow.getCell(12);
+    		    	 c8.setCellValue(p8.getCount());    		    	 
+    		    	 
+    		    	 ResultModel p9= (ResultModel) mods.get(i+8);
+    		    	 HSSFCell c9= dataRow.getCell(13);
+    		    	 c9.setCellValue(p9.getCount());
+    		    	 
+    	    	 }
+    		 }
+	    	  	 
+         } 
+    	 try {
+	   		  FileOutputStream out = new FileOutputStream("D:/" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()).toString() +".xls");
+	   		  workBook.write(out);
+	   		  out.close();
+	   	 }catch (FileNotFoundException e) {
+	   		 e.printStackTrace(); 
+	     }
+     }
+    
+     /**
+      * 导出公用的方法
+      * @param request
+      * @param response
+      * @param maps
+      * @param map
+      * @param exportNm
+      * @param xmlName
+      * @throws Exception
+      */
+     
+     private void export(HttpServletRequest request, HttpServletResponse response,
+		Map<String, List<PatrolCatalogModel>> maps, JSONObject map,String exportNm,String xmlName) throws Exception {
+		List<PatrolCatalogModel> m  = routineSerivce.selectList(map);
+	    for(PatrolCatalogModel patrol:m){
+ 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+ 			patrol.setsPatrolTm(df.format(patrol.getPatrolTm()));
+ 			patrol.setsPatrolEndTm(df.format(patrol.getPatrolEndTm()));
+ 			if(StringUtils.isNotBlank(patrol.getPatrolTmLt())){
+ 				int s = Integer.parseInt(patrol.getPatrolTmLt());
+ 				if(s > 60){
+ 					patrol.setPatrolTmLt(s/60+"分"+s%60+"秒");
+ 				}else{
+ 					patrol.setPatrolTmLt(s+"秒");
+ 				}
+ 			}else{
+ 				patrol.setPatrolTmLt("0秒");
+ 			}
+ 			if(StringUtils.isNotBlank(patrol.getPatrolMileage())){
+ 				DecimalFormat format= new DecimalFormat("#.00");
+	 			double mileage = Double.parseDouble(patrol.getPatrolMileage());
+	 			if(mileage == 0.0){
+	 				patrol.setPatrolMileage("0米");
+	 			}else{
+		 			if(mileage > 1000){
+		 				patrol.setPatrolMileage(format.format(mileage/1000)+"千米");
+		 			}else{
+		 				patrol.setPatrolMileage(format.format(mileage)+"米");
+		 			}
+	 			}
+ 			}
+ 		}
+ 		maps.put("m",m);
+ 		String title="巡河记录表";
+ 		JxlsUtils.export(maps, title, xmlName,request, response);
+	}
+     
+     public  HSSFCellStyle setCellStyle(HSSFWorkbook workBook){
+    	// 设置字体
+    	 HSSFFont font = workBook.createFont();  
+    	 font.setFontName("微软雅黑");
+    	 font.setFontHeightInPoints((short) 10);  
+    	// 设置样式
+    	 HSSFCellStyle cellStyle = workBook.createCellStyle();  
+    	 cellStyle.setFont(font);  
+    	 cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);  
+    	 cellStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN); //下边框
+    	 cellStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);//左边框
+    	 cellStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);//上边框
+    	 cellStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);//右边框
+    	 return cellStyle;
+     }
+     
+}
+

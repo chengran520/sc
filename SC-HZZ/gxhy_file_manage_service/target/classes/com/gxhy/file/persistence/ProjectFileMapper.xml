@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.file.persistence.ProjectFileMapper">
+  
+    <!-- 增加制度文件 -->
+    <insert id="insertProjectFile">  
+       INSERT INTO IOT_PROJECT_FILE(UUID,PROJECT_NAME,START_TIME,END_TIME,CREAT_TIME,UPDATE_TIME,DESCRIBE,APPLICANT,TYPE,FILETYPE,ISFOREVER)
+       values(#{uuid},#{projectName},#{startTime},#{endTime},#{creatTime},#{updateTime},#{describe},#{applicant},#{type},#{fileType},#{isForever})
+       
+    </insert>
+    
+   <!-- 根据条件查询列表 -->
+   <select id="getProjectList"  resultType="com.gxhy.file.domain.ProjectFileModel">
+	   <include refid="selectProjectInfo"></include>
+	   <include refid="queryProject"></include>
+	   ORDER BY CREAT_TIME DESC
+   </select>
+   
+   <!-- 删除项目文件 -->
+   <delete id="deleteProject">
+       DELETE FROM IOT_PROJECT_FILE WHERE UUID=#{uuid}
+   </delete>
+   
+   <!--详情页面 -->
+   <select id="DetailProject" resultType="com.gxhy.file.domain.ProjectFileModel">
+       SELECT UUID, PROJECT_NAME,(SELECT U.USER_NAME FROM SYS_USER U WHERE U.USER_ID=APPLICANT) AS applicantNm,
+       (SELECT D.DICT_NM FROM SYS_DICT D WHERE D.DICT_VAL=TYPE AND D.DICT_TP='PROJECT')AS typeNm,DESCRIBE,START_TIME,
+       TYPE,END_TIME FROM IOT_PROJECT_FILE WHERE UUID=#{uuid}
+   </select>
+   
+   <!-- 修改 -->
+   <update id="updateProjectFile">
+       UPDATE IOT_PROJECT_FILE SET PROJECT_NAME=#{projectName},START_TIME=#{startTime},END_TIME=#{endTime},
+       DESCRIBE=#{describe},UPDATE_TIME=#{updateTime},TYPE=#{type} WHERE UUID=#{uuid} 
+   </update>
+   
+   <sql id="selectProjectInfo">       
+       SELECT UUID, PROJECT_NAME,(SELECT U.USER_NAME FROM SYS_USER U WHERE U.USER_ID=APPLICANT) AS applicantNm,
+       (SELECT D.DICT_NM FROM SYS_DICT D WHERE D.DICT_VAL=TYPE AND D.DICT_TP='PROJECT')AS typeNm,DESCRIBE, 
+       START_TIME,END_TIME,ISFOREVER,CREAT_TIME FROM IOT_PROJECT_FILE where 1=1   
+   </sql>
+   <!-- 条件 -->
+   <sql id="queryProject">
+        <!--  <if test="startTm != null and startTm != ''">
+			AND START_TIME >= #{startTm}
+		 </if>
+		 <if test="endTm != null and endTm != ''">
+			AND END_TIME &lt;= #{endTm}
+		 </if> -->
+		 <if test="startTm != null and startTm != ''">
+				 AND CREAT_TIME >= #{startTm}
+			</if>
+			<if test="endTm != null and endTm != ''">
+				 AND CREAT_TIME &lt;= #{endTm}
+			</if>
+		 <if test="keyword != null and keyword != ''">
+			AND PROJECT_NAME LIKE '%${keyword}%'
+		 </if>
+   </sql>
+</mapper>

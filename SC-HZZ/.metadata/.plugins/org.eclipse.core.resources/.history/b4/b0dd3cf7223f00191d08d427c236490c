@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.datamonitor.persistence.SewageMapper">
+  <!-- 获取排污口信息 -->
+  <select id="getSewages" resultType="com.gxhy.datamonitor.domain.SewageModel">
+     SELECT W.UUID,W.ADCD,W.NAME,W.UNIT,W.UNIT_ADDRESS,W.STAND,COMP_DT,W.INDUSTRY,W.OUTPUT,W.WATER_INTAKE,W.WATER_DEPT,W.ENVIR_DEPT,
+     W.IS_PROTECT,W.LTTD,W.LGTD,W.ADDRESS,W.RV_NM,W.WFZ_NM,W.EMIS_TP,W.DES_RHHFWSL,W.APP_RHHFWSL,W.REA_RHHFWSL,W.STANDARD,W.POLLUTANT,
+     W.RHHFWSL,W.REMARK,SCALE,D.ADDVNM,B.RV_NM
+     FROM HZZBAK_SYS_DB.dbo.WQ_PDO_B   W
+     LEFT JOIN ST_ADDVCD_D D
+     ON W.ADCD=D.ADDVCD
+     LEFT JOIN ST_RIVER_B B
+     ON W.RV_NM=B.RV_CD
+  </select>
+
+</mapper>
+

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.routine.persistence.LawEnMentMapper">	
+    <!-- 获取执法监管列表-->
+    <select id="getLawList" resultType="com.gxhy.routine.webmodel.ResultLawModel">
+    	 <include refid="baseSql"></include>
+    	 WHERE (L.REGISTERUSER LIKE '%${userId}%'    OR  REPORT_USER=#{userId}) 
+			<if test="stat != null and stat != ''">
+				AND L.STATUS=#{stat}
+			</if>
+			<if test="isFilling != null and isFilling != ''">
+				AND L.IS_FILING=#{isFilling}
+			</if>
+			<if test="startTm != null and startTm != ''">
+				AND L.REPORT_TM >= #{startTm}
+			</if>
+			<if test="endTm != null and endTm != ''">
+				AND L.REPORT_TM &lt;= #{endTm}
+			</if>
+			<if test="lawSource != null and lawSource != ''">
+				AND B.BUSINE_ORIGIN=#{lawSource}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND B.BUSINE_ADDRESS  LIKE '%${keyword}%' 
+			</if>
+			<if test="uuid != null and uuid != ''">
+				AND L.UUID  =#{uuid}
+			</if>
+			ORDER BY L.REPORT_TM DESC
+    </select>
+    
+    <select id="getAllLawList" resultType="com.gxhy.routine.webmodel.ResultLawModel">
+        <include refid="baseSql"></include>
+        <where>
+         <if test="status != null and status != ''">
+			W.STATUS=#{status}
+		</if>
+		<if test="stat != null and stat != ''">
+			AND L.STATUS=#{stat}
+		</if>
+		<if test="startTm != null and startTm != ''">
+			AND L.REPORT_TM >= #{startTm}
+		</if>
+		<if test="endTm != null and endTm != ''">
+			AND L.REPORT_TM &lt;= #{endTm}
+		</if>
+		<if test="lawSource != null and lawSource != ''">
+			AND B.BUSINE_ORIGIN=#{lawSource}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND B.BUSINE_ADDRESS  LIKE '%${keyword}%' 
+		</if>
+		<if test="uuid != null and uuid != ''">
+			AND L.UUID  =#{uuid}
+		</if>
+		</where>
+		ORDER BY L.REPORT_TM DESC
+    </select>
+   <!-- 更新业务表以便隐藏 -->
+	<update id="updateBusineById">
+	   	 UPDATE IOT_BUSINE_ACCEPT SET BUSINE_STATUS='5' WHERE BUSINE_ID=#{busineId}
+	</update>
+   
+   <!-- 增加执法记录 -->
+   <insert id="addLaw">
+	    INSERT INTO  IOT_LAW_MENT(UUID,LAW_ID,LAW_SOURCE,REPORT_USER,REPORT_TM,HANDLE_TMMIT,IS_FILING,IS_FILCLOSE,REGISTERUSER,STATUS,REGISTERUSER_NM)VALUES(#{uuid},#{lawId},#{busineId},#{userId},#{reportTm},#{handleTmmit},#{isFiling},#{isFilClose},#{registerUser},#{status},#{registerUserNm})
+   </insert>
+   
+   <!-- 更新执法记录 -->
+   <select id="updateLawById">
+        UPDATE IOT_LAW_MENT  SET IS_FILING=#{isFiling},REGISTER_TM=#{registerTm},STATUS=#{status} WHERE LAW_ID=#{lawId}
+   </select>
+   
+   <!--  更新执法记录-->
+   <update id="updateLaw">
+      UPDATE IOT_LAW_MENT  SET IS_FILCLOSE=#{isFilClose}, STATUS=#{status} WHERE LAW_ID=#{lawId}
+   </update>
+   <!--  增加执法对应的流程信息-->
+   <insert id="insertLawWorkFlow">
+   		INSERT INTO IOT_WORKFLOW_LAW(WORKFLOW_ID,LAW_ID,HANDLE_USERID,HANDLE_TM,STATUS,LAST_HANDLE_USERID,HANDLE_VIEW)VALUES(#{workflowId},#{lawId},#{handleUserId},#{handleTm},#{status},#{lastHandleUserId},#{handleView})
+   </insert>
+   
+   <!-- 获取时间轴 -->
+   <select id="getLawWorkFlows" resultType="com.gxhy.routine.webmodel.LawWorkFlowModel">
+ 		SELECT 
+		  (SELECT USER_NAME FROM SYS_USER WHERE USER_ID=HANDLE_USERID)AS handleUser,(SELECT D.DICT_NM FROM
+        SYS_USER U
+      left JOIN SYS_DICT D  ON U.JOB=D.DICT_VAL  WHERE D.DICT_TP='JOB' AND USER_ID=HANDLE_USERID)AS job,
+	  (select DEPT_NM from SYS_DEPT  where  DEPT_ID=(SELECT U.DEPTID
+	  FROM SYS_USER U WHERE U.USER_ID=HANDLE_USERID)) AS dept,
+	  (SELECT USER_NAME FROM SYS_USER WHERE USER_ID=(select REPORT_USER from IOT_LAW_MENT  WHERE LAW_ID=#{lawId}))
+	  as reportUser,(select REPORT_TM from IOT_LAW_MENT    WHERE LAW_ID=#{lawId}) as reportTm,  HANDLE_TM AS handleTm,STATUS AS status,HANDLE_VIEW  AS handleView 
+	  FROM IOT_WORKFLOW_LAW    WHERE LAW_ID=#{lawId}  ORDER BY HANDLE_TM ASC 
+   </select>
+   
+   <!-- 获取人员 -->
+   <select id="selectUser" resultType="com.gxhy.base.domain.SysUsers">
+  	 SELECT USER_ID,USER_NAME FROM SYS_USER
+   </select>
+   
+   <sql id="baseSql">
+     SELECT distinct L.LAW_ID AS lawId,L.LAW_SOURCE AS busineId,L.HANDLE_TMMIT AS handleTmmit,L.REGISTERUSER AS  registerUserId,L.IS_FILING AS isFiling,
+   	 L.REGISTER_TM AS registerTm,L.IS_FILCLOSE AS isFilClose,L.REGISTERUSER_NM AS registerUserNm,
+   	 B.BUSINE_ADDRESS AS busineAddress,(SELECT USER_NAME FROM SYS_USER WHERE USER_ID=REPORT_USER)AS reportUser,
+   	 (select top 1 status from  IOT_WORKFLOW_LAW  where  LAW_ID=l.LAW_ID    and  HANDLE_USERID=#{userId}  
+	 order  by  HANDLE_TM  desc)AS status,(SELECT USER_PHONE
+   	 FROM SYS_USER WHERE USER_ID=REPORT_USER)AS reportUserPhone,L.REPORT_TM  AS reportTm,B.BUSINE_DESC AS busineDesc,(SELECT MAX(HANDLE_TM) FROM 
+   	 IOT_WORKFLOW_LAW WHERE LAW_ID= L.LAW_ID) AS handleTm FROM IOT_LAW_MENT  L LEFT JOIN IOT_BUSINE_ACCEPT B ON L.LAW_SOURCE=B.BUSINE_ID 
+   	 LEFT JOIN IOT_WORKFLOW_LAW  W ON L.LAW_ID=W.LAW_ID
+   </sql>
+</mapper>

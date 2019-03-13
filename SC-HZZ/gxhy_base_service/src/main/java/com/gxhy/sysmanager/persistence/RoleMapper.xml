@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gxhy.sysmanager.persistence.RoleMapper">
+    <resultMap id="RoleResultMap" type="com.gxhy.sysmanager.domain.RoleModel">
+	    <result column="UUID"      jdbcType="VARCHAR" property="uuid" />
+	    <result column="ROLE_ID"   jdbcType="VARCHAR" property="roleId" />
+	    <result column="ROLE_NAME" jdbcType="VARCHAR" property="roleName" />
+	    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+	    <result column="ROLE_DES"    jdbcType="VARCHAR" property="roleDes" />
+	    <result column="UPDATE_TIME" jdbcType="TIMESTAMP" property="updateTime" />
+    </resultMap>
+     
+     <!-- 角色用户关系 --> 
+      <resultMap id="Role_UserResultMap" type="com.gxhy.sysmanager.domain.RoleUserModel">
+	    <result column="ROLE_ID"      jdbcType="VARCHAR" property="roleId" />
+	    <result column="USER_ID"   jdbcType="VARCHAR" property="userId" />
+    </resultMap>
+       
+    
+    <!-- 角色列表 -->
+    <select id="getRoleList" resultMap="RoleResultMap">
+      		   SELECT * FROM SYS_ROLE
+  		<where>
+			 <if test="keyword!= null and keyword != ''">
+				 ROLE_ID  LIKE '%${keyword}%' or ROLE_NAME LIKE '%${keyword}%'  
+			 </if>
+			<if test="startTime != null and startTime != ''">
+				 AND CREATE_TIME >= #{startTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+				 AND CREATE_TIME &lt;= #{endTime}
+			</if>
+		</where>
+		       ORDER BY   CREATE_TIME DESC
+    </select>
+   
+   <!--获取角色树-->
+   <select id="getRoleZtree"  resultType="com.gxhy.sysmanager.domain.ZtreeRoleModel">
+     SELECT ROLE_ID AS id,ROLE_NAME AS name FROM SYS_ROLE
+   </select>
+   
+  <!-- 增加角色 -->
+  <insert id="saveRole">
+        INSERT INTO SYS_ROLE(UUID,ROLE_ID,ROLE_NAME,CREATE_TIME,ROLE_DES,UPDATE_TIME)
+        VALUES(#{uuid},#{roleId},#{roleName},#{createTime},#{roleDes},#{updateTime})
+  </insert>
+  
+   <!--修改角色  -->
+ <update id="updateRole">
+  		UPDATE SYS_ROLE SET ROLE_ID=#{roleId},ROLE_NAME=#{roleName},CREATE_TIME=#{createTime},UPDATE_TIME=#{updateTime},ROLE_DES=#{roleDes}
+  		WHERE UUID=#{uuid} 	
+  </update> 
+  
+  <!-- 角色详情 -->
+  <select id="roleDetail" resultMap="RoleResultMap">
+       SELECT * FROM SYS_ROLE WHERE UUID=#{uuid}
+  </select>
+
+   <!-- 删除角色 -->
+   <select id="deleteRole">
+     DELETE FROM SYS_ROLE WHERE UUID=#{uuid}
+   </select>
+   
+   <!-- 修改角色 -->
+   <update id="updateRole_User">
+      UPDATE SYS_USER_ROLE SET ROLE_ID=#{roleId} WHERE USER_ID=#{userId}
+   </update>
+   
+   <!--查询某角色下的用户  -->
+   <select id="selectUserByRoleId"  resultMap="Role_UserResultMap">
+       SELECT ROLE_ID,USER_ID FROM SYS_USER_ROLE WHERE ROLE_ID=#{roleId}
+   </select>
+
+   <!-- 删除指定用户的所属的角色关系 -->
+   <delete id="deleteUser_Role">
+     DELETE FROM SYS_USER_ROLE WHERE USER_ID=#{userId}
+   </delete>
+   
+   <!--  查询某用户所属的角色-->
+   <select id="selectRoleByUserId" resultMap="Role_UserResultMap">
+      SELECT ROLE_ID FROM SYS_USER_ROLE  WHERE USER_ID=#{userId}
+   </select>
+   
+   <!-- 查询是否已有此角色-->
+   <select id="selectRole"  resultMap="RoleResultMap">
+      SELECT UUID FROM SYS_ROLE WHERE ROLE_ID=#{roleId} OR ROLE_NAME=#{roleName}
+   </select>
+</mapper>

@@ -1,0 +1,13 @@
+#Tomcat publish data
+#Wed Mar 06 09:11:02 CST 2019
+org.eclipse.jst.j2ee.server\:gxhy_routine_work_service=WEB-INF/lib/gxhy_routine_work_service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_comper_monitor_service=WEB-INF/lib/gxhy_comper_monitor_service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_data_fill_service=WEB-INF/lib/gxhy_data_fill_service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_busine_accept__service=WEB-INF/lib/gxhy_busine_accept__service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_util=WEB-INF/lib/gxhy_util-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_file_manage_service=WEB-INF/lib/gxhy_file_manage_service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_special_event_service=WEB-INF/lib/gxhy_special_event_service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_base_service=WEB-INF/lib/gxhy_base_service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_data_monitor_service=WEB-INF/lib/gxhy_data_monitor_service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_emergency_command_service=WEB-INF/lib/gxhy_emergency_command_service-1.0.0.jar
+org.eclipse.jst.j2ee.server\:gxhy_comper_hydro_service=WEB-INF/lib/gxhy_comper_hydro_service-1.0.0.jar
